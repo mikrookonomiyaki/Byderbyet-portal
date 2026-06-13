@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useTournamentData } from '../hooks/useTournamentData'
@@ -67,9 +67,13 @@ export default function AdminDashboard() {
 }
 
 function TournamentEditor({ tournamentId }) {
-  const { data, loading, error } = useTournamentData(tournamentId)
+  const [refreshKey, setRefreshKey] = useState(0)
+  const refresh = useCallback(() => setRefreshKey(k => k + 1), [])
+
+  const { data, loading, error } = useTournamentData(tournamentId, refreshKey)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(null)
+  const [saveSuccess, setSaveSuccess] = useState(false)
   const [localResults, setLocalResults] = useState({})
   const [dirty, setDirty] = useState(false)
 
@@ -97,6 +101,7 @@ function TournamentEditor({ tournamentId }) {
   async function save() {
     setSaving(true)
     setSaveError(null)
+    setSaveSuccess(false)
     const upserts = []
     for (const [participantId, events] of Object.entries(localResults)) {
       for (const [eventId, val] of Object.entries(events)) {
@@ -112,6 +117,8 @@ function TournamentEditor({ tournamentId }) {
       setSaveError(error.message)
     } else {
       setDirty(false)
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 3000)
     }
   }
 
@@ -125,61 +132,190 @@ function TournamentEditor({ tournamentId }) {
   return (
     <div>
       <div className={styles.toolbar}>
-        <button
-          className={styles.saveBtn}
-          onClick={save}
-          disabled={!dirty || saving}
-        >
+        <button className={styles.saveBtn} onClick={save} disabled={!dirty || saving}>
           {saving ? 'Lagrer...' : 'Lagre endringer'}
         </button>
         {saveError && <span className={styles.error}>{saveError}</span>}
-        {!dirty && !saving && <span className={styles.saved}>Lagret</span>}
+        {saveSuccess && <span className={styles.saved}>Lagret!</span>}
+        {!dirty && !saving && !saveSuccess && <span className={styles.savedMuted}>Ingen ulagrede endringer</span>}
       </div>
 
-      <div className={styles.tableWrap}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th className={styles.sticky}>Deltaker</th>
-              {days.map(day => (
-                <th key={day} colSpan={events.filter(e => e.day === day).length} className={styles.dayHeader}>
-                  {day}
-                </th>
-              ))}
-            </tr>
-            <tr>
-              <th className={styles.sticky}></th>
-              {events.map(e => (
-                <th key={e.id} className={styles.eventHeader} title={e.name}>
-                  {e.is_hansa ? 'Hansa' : e.name.substring(0, 8)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {standings.map(p => (
-              <tr key={p.id}>
-                <td className={styles.sticky}>{p.name}</td>
-                {events.map(e => (
-                  <td key={e.id} className={styles.cell}>
-                    <input
-                      type="number"
-                      min="1"
-                      className={styles.cellInput}
-                      value={localResults[p.id]?.[e.id] ?? ''}
-                      onChange={ev => handleChange(p.id, e.id, ev.target.value)}
-                    />
-                  </td>
+      {events.length > 0 && (
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th className={styles.sticky}>Deltaker</th>
+                {days.map(day => (
+                  <th key={day} colSpan={events.filter(e => e.day === day).length} className={styles.dayHeader}>
+                    {day}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+              <tr>
+                <th className={styles.sticky}></th>
+                {events.map(e => (
+                  <th key={e.id} className={styles.eventHeader} title={e.name}>
+                    {e.is_hansa ? 'Hansa' : e.name.substring(0, 8)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {standings.map(p => (
+                <tr key={p.id}>
+                  <td className={styles.sticky}>{p.name}</td>
+                  {events.map(e => (
+                    <td key={e.id} className={styles.cell}>
+                      <input
+                        type="number"
+                        min="1"
+                        className={styles.cellInput}
+                        value={localResults[p.id]?.[e.id] ?? ''}
+                        onChange={ev => handleChange(p.id, e.id, ev.target.value)}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <p className={styles.hint}>
         Skriv inn plassering per deltaker per øvelse. For Hansa-øvelser er plasseringen direkte doeng-poeng.
       </p>
+
+      <div className={styles.addSection}>
+        <AddParticipantForm tournamentId={tournamentId} onAdded={refresh} />
+        <AddEventForm tournamentId={tournamentId} onAdded={refresh} />
+      </div>
+    </div>
+  )
+}
+
+function AddParticipantForm({ tournamentId, onAdded }) {
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(null)
+
+  async function submit(e) {
+    e.preventDefault()
+    if (!name.trim()) return
+    setSaving(true)
+    setError(null)
+    const { error } = await supabase.from('participants').insert({
+      tournament_id: tournamentId,
+      name: name.trim(),
+      sort_order: 999,
+    })
+    setSaving(false)
+    if (error) {
+      setError(error.message)
+    } else {
+      setName('')
+      setOpen(false)
+      onAdded()
+    }
+  }
+
+  return (
+    <div className={styles.addCard}>
+      <button className={styles.addToggle} onClick={() => setOpen(o => !o)}>
+        {open ? 'Avbryt' : '+ Ny deltaker'}
+      </button>
+      {open && (
+        <form onSubmit={submit} className={styles.addForm}>
+          <input
+            className={styles.addInput}
+            placeholder="Navn"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            autoFocus
+          />
+          <button type="submit" className={styles.addSubmit} disabled={saving}>
+            {saving ? '...' : 'Legg til'}
+          </button>
+          {error && <p className={styles.error}>{error}</p>}
+        </form>
+      )}
+    </div>
+  )
+}
+
+function AddEventForm({ tournamentId, onAdded }) {
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [day, setDay] = useState('Fredag')
+  const [isHansa, setIsHansa] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(null)
+
+  async function submit(e) {
+    e.preventDefault()
+    if (!name.trim()) return
+    setSaving(true)
+    setError(null)
+    const id = `${tournamentId}-${Date.now().toString(36)}`
+    const { error } = await supabase.from('events').insert({
+      id,
+      tournament_id: tournamentId,
+      name: name.trim(),
+      day,
+      is_hansa: isHansa,
+      sort_order: 999,
+    })
+    setSaving(false)
+    if (error) {
+      setError(error.message)
+    } else {
+      setName('')
+      setDay('Fredag')
+      setIsHansa(false)
+      setOpen(false)
+      onAdded()
+    }
+  }
+
+  return (
+    <div className={styles.addCard}>
+      <button className={styles.addToggle} onClick={() => setOpen(o => !o)}>
+        {open ? 'Avbryt' : '+ Ny øvelse'}
+      </button>
+      {open && (
+        <form onSubmit={submit} className={styles.addForm}>
+          <input
+            className={styles.addInput}
+            placeholder="Navn på øvelse"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            autoFocus
+          />
+          <select
+            className={styles.addSelect}
+            value={day}
+            onChange={e => setDay(e.target.value)}
+          >
+            <option>Fredag</option>
+            <option>Lørdag</option>
+            <option>Søndag</option>
+          </select>
+          <label className={styles.addCheckbox}>
+            <input
+              type="checkbox"
+              checked={isHansa}
+              onChange={e => setIsHansa(e.target.checked)}
+            />
+            Hansa-øvelse
+          </label>
+          <button type="submit" className={styles.addSubmit} disabled={saving}>
+            {saving ? '...' : 'Legg til'}
+          </button>
+          {error && <p className={styles.error}>{error}</p>}
+        </form>
+      )}
     </div>
   )
 }

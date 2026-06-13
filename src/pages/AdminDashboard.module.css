@@ -196,8 +196,98 @@
   border-color: #1a1a1a;
 }
 
+.savedMuted {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
 .hint {
   font-size: 0.8rem;
   color: #999;
   margin-top: 1rem;
+}
+
+.addSection {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.addCard {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  min-width: 220px;
+}
+
+.addToggle {
+  background: none;
+  border: 1px dashed #aaa;
+  border-radius: 6px;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #555;
+  width: 100%;
+  text-align: left;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.addToggle:hover {
+  border-color: #1a1a1a;
+  color: #1a1a1a;
+}
+
+.addForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.addInput {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.addInput:focus {
+  border-color: #1a1a1a;
+}
+
+.addSelect {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: #fff;
+  outline: none;
+}
+
+.addCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.addSubmit {
+  padding: 0.5rem;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.addSubmit:disabled {
+  opacity: 0.5;
 }

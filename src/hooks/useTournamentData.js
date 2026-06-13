@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
 import { canonicalize } from '../eventNames'
 
-export function useTournamentData(tournamentId) {
+export function useTournamentData(tournamentId, refreshKey = 0) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -56,7 +56,17 @@ export function useTournamentData(tournamentId) {
     }
 
     load().catch(err => { setError(err.message); setLoading(false) })
-  }, [tournamentId])
+
+    // Live updates: re-fetch when any result changes for this tournament
+    const channel = supabase
+      .channel(`results-${tournamentId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'results' }, () => {
+        load().catch(() => {})
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [tournamentId, refreshKey])
 
   return { data, loading, error }
 }
