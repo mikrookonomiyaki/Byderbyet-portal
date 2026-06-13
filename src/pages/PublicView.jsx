@@ -25,7 +25,10 @@ export default function PublicView() {
         Årets Byderby går snart av den såkalte stabelen! Møt opp 03.07–05.07 med spissede skotupper!
       </div>
       <header className={styles.header}>
-        <h1 className={styles.title}>Byderbyet</h1>
+        <div className={styles.brand}>
+          <img src="/byderbyet_emblem.png" alt="Byderbyet emblem" className={styles.emblem} />
+          <h1 className={styles.title}>Byderbyet</h1>
+        </div>
         <nav className={styles.nav}>
           <div className={styles.activeTabs}>
             {tournaments.filter(t => t.is_active).map(t => (
