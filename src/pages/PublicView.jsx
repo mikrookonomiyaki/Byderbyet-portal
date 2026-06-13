@@ -43,7 +43,7 @@ export default function PublicView() {
           </div>
           {tournaments.some(t => !t.is_active) && (
             <div className={styles.historiskGroup}>
-              <span className={styles.historiskLabel}>Historisk:</span>
+              <span className={styles.historiskLabel}>Historiske resultater</span>
               <div className={styles.historiskTabs}>
                 {tournaments.filter(t => !t.is_active).map(t => (
                   <button
