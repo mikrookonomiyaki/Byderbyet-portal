@@ -22,7 +22,7 @@ export default function PublicView() {
   return (
     <div className={styles.page}>
       <div className={styles.banner}>
-        Årets Byderby skal snart av skaftene! 03.07–05.07. Spiss skotuppene!
+        Årets Byderby går snart av den såkalte stabelen! Møt opp 03.07–05.07 med spissede skotupper!
       </div>
       <header className={styles.header}>
         <h1 className={styles.title}>Byderbyet</h1>
