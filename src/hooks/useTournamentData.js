@@ -38,7 +38,7 @@ export function useTournamentData(tournamentId) {
         if (!resultMap[r.participant_id]) resultMap[r.participant_id] = {}
         const event = events.find(e => e.id === r.event_id)
         if (!event) return
-        const doeng = event.is_hansa ? r.placement : (scale[r.placement] ?? null)
+        const doeng = event.is_hansa ? r.placement : (scale[r.placement] ?? r.placement)
         resultMap[r.participant_id][r.event_id] = { placement: r.placement, doeng }
       })
 
