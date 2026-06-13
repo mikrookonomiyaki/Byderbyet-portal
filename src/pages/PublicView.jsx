@@ -27,10 +27,22 @@ export default function PublicView() {
       <header className={styles.header}>
         <h1 className={styles.title}>Byderbyet</h1>
         <nav className={styles.tabs}>
-          {tournaments.map(t => (
+          {tournaments.filter(t => t.is_active).map(t => (
             <button
               key={t.id}
-              className={`${styles.tab} ${selectedId === t.id ? styles.active : ''}`}
+              className={`${styles.tab} ${styles.tabActive} ${selectedId === t.id ? styles.selected : ''}`}
+              onClick={() => setSelectedId(t.id)}
+            >
+              {t.year}
+            </button>
+          ))}
+          {tournaments.some(t => !t.is_active) && (
+            <span className={styles.historiskLabel}>Historisk:</span>
+          )}
+          {tournaments.filter(t => !t.is_active).map(t => (
+            <button
+              key={t.id}
+              className={`${styles.tab} ${styles.tabHistoric} ${selectedId === t.id ? styles.selected : ''}`}
               onClick={() => setSelectedId(t.id)}
             >
               {t.year}
