@@ -26,40 +26,74 @@ export default function PublicView() {
       </div>
       <header className={styles.header}>
         <h1 className={styles.title}>Byderbyet</h1>
-        <nav className={styles.tabs}>
-          {tournaments.filter(t => t.is_active).map(t => (
-            <button
-              key={t.id}
-              className={`${styles.tab} ${styles.tabActive} ${selectedId === t.id ? styles.selected : ''}`}
-              onClick={() => setSelectedId(t.id)}
-            >
-              {t.year}
-            </button>
-          ))}
+        <nav className={styles.nav}>
+          <div className={styles.activeTabs}>
+            {tournaments.filter(t => t.is_active).map(t => (
+              <button
+                key={t.id}
+                className={`${styles.tab} ${styles.tabActive} ${selectedId === t.id ? styles.selected : ''}`}
+                onClick={() => setSelectedId(t.id)}
+              >
+                {t.year}
+              </button>
+            ))}
+          </div>
           {tournaments.some(t => !t.is_active) && (
-            <span className={styles.historiskLabel}>Historisk:</span>
+            <div className={styles.historiskGroup}>
+              <span className={styles.historiskLabel}>Historisk:</span>
+              <div className={styles.historiskTabs}>
+                {tournaments.filter(t => !t.is_active).map(t => (
+                  <button
+                    key={t.id}
+                    className={`${styles.tab} ${styles.tabHistoric} ${selectedId === t.id ? styles.selected : ''}`}
+                    onClick={() => setSelectedId(t.id)}
+                  >
+                    {t.year}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
-          {tournaments.filter(t => !t.is_active).map(t => (
-            <button
-              key={t.id}
-              className={`${styles.tab} ${styles.tabHistoric} ${selectedId === t.id ? styles.selected : ''}`}
-              onClick={() => setSelectedId(t.id)}
-            >
-              {t.year}
-            </button>
-          ))}
         </nav>
       </header>
 
       <main className={styles.main}>
         {loading && <p className={styles.status}>Laster...</p>}
         {error && <p className={styles.error}>Feil: {error}</p>}
-        {data && <TournamentView data={data} />}
+        {data && data.events.length === 0 && <EmptyTournament year={tournaments.find(t => t.id === selectedId)?.year} />}
+        {data && data.events.length > 0 && <TournamentView data={data} />}
       </main>
 
       <footer className={styles.footer}>
         <a href="/admin">Admin</a>
       </footer>
+    </div>
+  )
+}
+
+function EmptyTournament({ year }) {
+  return (
+    <div className={styles.empty}>
+      <p className={styles.emptyYear}>{year}</p>
+      <p className={styles.emptyMsg}>Øvelser og resultater er ikke klare ennå.</p>
+      <table className={styles.table} style={{ maxWidth: 320, marginTop: '1.5rem' }}>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Deltaker</th>
+            <th>Doeng</th>
+          </tr>
+        </thead>
+        <tbody>
+          {['?', '?', '?'].map((_, i) => (
+            <tr key={i}>
+              <td>{i + 1}</td>
+              <td className={styles.emptyCell}>?</td>
+              <td className={styles.emptyCell}>?</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }

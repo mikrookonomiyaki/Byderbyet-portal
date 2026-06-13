@@ -30,11 +30,35 @@
   margin: 0 0 1rem;
 }
 
-.tabs {
+.nav {
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
   gap: 0.25rem;
-  flex-wrap: wrap;
+}
+
+.activeTabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.historiskGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding-left: 0.1rem;
+}
+
+.historiskLabel {
+  font-size: 0.7rem;
+  color: #666;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem 0;
+}
+
+.historiskTabs {
+  display: flex;
+  gap: 0.25rem;
 }
 
 .tab {
@@ -61,13 +85,6 @@
   color: #1a1a1a;
 }
 
-.historiskLabel {
-  font-size: 0.75rem;
-  color: #666;
-  padding: 0 0.5rem 0.6rem;
-  align-self: flex-end;
-}
-
 .tabHistoric {
   color: #888;
   font-size: 0.85rem;
@@ -82,6 +99,27 @@
   background: #f8f8f6;
   color: #555;
   font-weight: 600;
+}
+
+.empty {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.emptyYear {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #ccc;
+  margin: 0;
+}
+
+.emptyMsg {
+  color: #999;
+  margin: 0.5rem 0 0;
+}
+
+.emptyCell {
+  color: #ccc;
 }
 
 .main {
