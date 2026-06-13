@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useTournamentData } from '../hooks/useTournamentData'
 import styles from './PublicView.module.css'
@@ -65,7 +66,7 @@ function TournamentView({ data }) {
           className={`${styles.toggleBtn} ${view === 'detail' ? styles.active : ''}`}
           onClick={() => setView('detail')}
         >
-          Øvelser
+          Detaljert
         </button>
       </div>
 
@@ -119,8 +120,14 @@ function DetailTable({ standings, events }) {
           <tr>
             <th className={styles.sticky}></th>
             {events.map(e => (
-              <th key={e.id} className={styles.eventHeader} title={e.name}>
-                {e.is_hansa ? 'Hansa' : e.name.substring(0, 8)}
+              <th key={e.id} className={styles.eventHeader}>
+                <Link
+                  to={`/event/${encodeURIComponent(e.name)}`}
+                  className={styles.eventLink}
+                  title={e.name}
+                >
+                  {e.is_hansa ? 'Hansa' : e.name.substring(0, 8)}
+                </Link>
               </th>
             ))}
             <th></th>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
+import { canonicalize } from '../eventNames'
 
 export function useTournamentData(tournamentId) {
   const [data, setData] = useState(null)
@@ -29,7 +30,7 @@ export function useTournamentData(tournamentId) {
       const scale = {}
       scaleRes.data.forEach(r => { scale[r.position] = r.points })
 
-      const events = eventsRes.data
+      const events = eventsRes.data.map(e => ({ ...e, name: canonicalize(e.name) }))
       const participants = participantsRes.data
 
       // Build a map: participantId -> { eventId -> doeng }
