@@ -65,7 +65,7 @@ function TournamentView({ data }) {
           className={`${styles.toggleBtn} ${view === 'detail' ? styles.active : ''}`}
           onClick={() => setView('detail')}
         >
-          Detaljert
+          Øvelser
         </button>
       </div>
 
@@ -134,11 +134,7 @@ function DetailTable({ standings, events }) {
                 const r = p.eventResults[e.id]
                 return (
                   <td key={e.id} className={styles.cell}>
-                    {r ? (
-                      <span title={`Plass ${r.placement}`}>
-                        {r.doeng !== null ? r.doeng : '—'}
-                      </span>
-                    ) : ''}
+                    {r ? `${r.placement} (${r.doeng})` : ''}
                   </td>
                 )
               })}
