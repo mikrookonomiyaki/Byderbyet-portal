@@ -2,8 +2,30 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useTournamentData } from '../hooks/useTournamentData'
+import { useHallOfFame } from '../hooks/useHallOfFame'
 import TrophyIcon from '../components/TrophyIcon'
 import styles from './PublicView.module.css'
+
+function HallOfFame() {
+  const winners = useHallOfFame()
+  if (winners.length === 0) return null
+  return (
+    <div className={styles.hallOfFame}>
+      <p className={styles.hofTitle}>Hall of Fame</p>
+      <ul className={styles.hofList}>
+        {winners.map(w => (
+          <li key={w.year} className={styles.hofItem}>
+            <span className={styles.hofYear}>{w.year}</span>
+            <Link to={`/participant/${encodeURIComponent(w.name)}`} className={styles.hofName}>
+              {w.name}
+            </Link>
+            <TrophyIcon className={styles.hofIcon} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
 
 export default function PublicView() {
   const [tournaments, setTournaments] = useState([])
@@ -26,9 +48,12 @@ export default function PublicView() {
         Årets Byderby går snart av den såkalte stabelen! Møt opp 03.07–05.07 med spissede skotupper!
       </div>
       <header className={styles.header}>
-        <div className={styles.brand}>
-          <img src="/byderbyet_emblem.png" alt="Byderbyet emblem" className={styles.emblem} />
-          <h1 className={styles.title}>Byderbyet</h1>
+        <div className={styles.headerTop}>
+          <div className={styles.brand}>
+            <img src="/byderbyet_emblem.png" alt="Byderbyet emblem" className={styles.emblem} />
+            <h1 className={styles.title}>Byderbyet</h1>
+          </div>
+          <HallOfFame />
         </div>
         <nav className={styles.nav}>
           <div className={styles.activeTabs}>

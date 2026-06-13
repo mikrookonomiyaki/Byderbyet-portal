@@ -23,11 +23,71 @@
   padding: 1.25rem 1.5rem 0;
 }
 
+.headerTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
 .brand {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1rem;
+}
+
+.hallOfFame {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.hofTitle {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #666;
+  margin: 0 0 0.45rem;
+}
+
+.hofList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.hofItem {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.hofYear {
+  color: #555;
+  font-size: 0.72rem;
+}
+
+.hofName {
+  color: #ddd;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.hofName:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.hofIcon {
+  width: 12px;
+  height: 12px;
+  color: #f59e0b;
+  flex-shrink: 0;
 }
 
 .emblem {
@@ -309,6 +369,10 @@
 
   .title {
     font-size: 1.3rem;
+  }
+
+  .hallOfFame {
+    display: none;
   }
 
   .nav {
