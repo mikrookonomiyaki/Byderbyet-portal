@@ -67,6 +67,80 @@
   letter-spacing: 0.04em;
 }
 
+.trophySection {
+  background: #fef9c3;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #fde68a;
+}
+
+.trophyTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #92400e;
+  margin: 0 0 0.6rem;
+}
+
+.trophyList {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.trophy {
+  background: #1a1a1a;
+  color: #fef9c3;
+  font-weight: 800;
+  font-size: 1rem;
+  padding: 0.3rem 0.9rem;
+  border-radius: 6px;
+}
+
+.etappeSection {
+  margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #555;
+  margin: 0 0 0.6rem;
+}
+
+.etappeList {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.etappeChip {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: #1a1a1a;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: border-color 0.15s;
+}
+
+.etappeChip:hover {
+  border-color: #1a1a1a;
+}
+
+.etappeYear {
+  color: #aaa;
+  font-size: 0.78rem;
+}
+
 .yearBlock {
   margin-bottom: 2rem;
 }
