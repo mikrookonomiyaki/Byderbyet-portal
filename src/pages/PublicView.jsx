@@ -170,10 +170,10 @@ function RankingTable({ standings }) {
             <tr key={p.id} className={i === 0 ? styles.gold : i === 1 ? styles.silver : i === 2 ? styles.bronze : ''}>
               <td>{i + 1}</td>
               <td>
-                {i === 0 && <TrophyIcon className={styles.trophyIcon} />}
                 <Link to={`/participant/${encodeURIComponent(p.name)}`} className={styles.nameLink}>
                   {p.name}
                 </Link>
+                {i === 0 && <TrophyIcon outline className={styles.trophyIcon} />}
               </td>
               <td>{p.total}</td>
             </tr>
