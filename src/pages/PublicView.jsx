@@ -21,6 +21,9 @@ export default function PublicView() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.banner}>
+        Årets Byderby skal snart av skaftene! 03.07–05.07. Spiss skotuppene!
+      </div>
       <header className={styles.header}>
         <h1 className={styles.title}>Byderbyet</h1>
         <nav className={styles.tabs}>
@@ -89,7 +92,7 @@ function RankingTable({ standings }) {
         </thead>
         <tbody>
           {standings.map((p, i) => (
-            <tr key={p.id} className={i === 0 ? styles.winner : ''}>
+            <tr key={p.id} className={i === 0 ? styles.gold : i === 1 ? styles.silver : i === 2 ? styles.bronze : ''}>
               <td>{i + 1}</td>
               <td>{p.name}</td>
               <td>{p.total}</td>
