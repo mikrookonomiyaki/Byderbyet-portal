@@ -11,7 +11,7 @@ function HallOfFame() {
   if (winners.length === 0) return null
   return (
     <div className={styles.hallOfFame}>
-      <p className={styles.hofTitle}>Hall of Fame</p>
+      <p className={styles.hofTitle}>Æresvegg</p>
       <ul className={styles.hofList}>
         {winners.map(w => (
           <li key={w.year} className={styles.hofItem}>

@@ -1,13 +1,11 @@
 export default function TrophyIcon({ className }) {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      fill="currentColor"
-      className={className}
-      aria-hidden="true"
-      style={{ display: 'inline-block', verticalAlign: 'middle' }}
-    >
-      <path d="M5 2h10v6a5 5 0 01-10 0V2zM3 3H1v2a3.5 3.5 0 002.5 3.35V3zm14 0h-2v5.35A3.5 3.5 0 0019 5V3h-2zM9 13.9V16H7v1.5h6V16h-2v-2.1A6 6 0 0015 8V2H5v6a6 6 0 004 5.9z"/>
+    <svg viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M5 2h10v5a5 5 0 01-10 0V2z"/>
+      <path d="M5 3H3a2.5 2.5 0 000 5h2V3z"/>
+      <path d="M15 3h2a2.5 2.5 0 010 5h-2V3z"/>
+      <rect x="8.5" y="10" width="3" height="4"/>
+      <rect x="5" y="14" width="10" height="2.5"/>
     </svg>
   )
 }
