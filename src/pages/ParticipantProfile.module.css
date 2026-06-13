@@ -82,6 +82,15 @@
   letter-spacing: 0.06em;
   color: #92400e;
   margin: 0 0 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.trophyIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .trophyList {

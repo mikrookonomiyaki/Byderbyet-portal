@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { canonicalize } from '../eventNames'
+import TrophyIcon from '../components/TrophyIcon'
 import styles from './ParticipantProfile.module.css'
 
 export default function ParticipantProfile() {
@@ -157,7 +158,9 @@ function ProfileView({ data }) {
 
       {byderbyWins.length > 0 && (
         <div className={styles.trophySection}>
-          <h2 className={styles.trophyTitle}>Byderby-pokaler</h2>
+          <h2 className={styles.trophyTitle}>
+            <TrophyIcon className={styles.trophyIcon} /> Byderby-pokaler
+          </h2>
           <div className={styles.trophyList}>
             {byderbyWins.map(y => (
               <span key={y} className={styles.trophy}>{y}</span>

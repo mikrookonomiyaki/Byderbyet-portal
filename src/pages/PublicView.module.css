@@ -261,6 +261,13 @@
   border-left: 2px solid #ddd;
 }
 
+.trophyIcon {
+  width: 15px;
+  height: 15px;
+  margin-right: 0.35rem;
+  color: #b45309;
+}
+
 .nameLink {
   color: inherit;
   text-decoration: none;

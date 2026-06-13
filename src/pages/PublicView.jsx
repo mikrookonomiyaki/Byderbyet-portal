@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useTournamentData } from '../hooks/useTournamentData'
+import TrophyIcon from '../components/TrophyIcon'
 import styles from './PublicView.module.css'
 
 export default function PublicView() {
@@ -144,6 +145,7 @@ function RankingTable({ standings }) {
             <tr key={p.id} className={i === 0 ? styles.gold : i === 1 ? styles.silver : i === 2 ? styles.bronze : ''}>
               <td>{i + 1}</td>
               <td>
+                {i === 0 && <TrophyIcon className={styles.trophyIcon} />}
                 <Link to={`/participant/${encodeURIComponent(p.name)}`} className={styles.nameLink}>
                   {p.name}
                 </Link>
