@@ -1,12 +1,12 @@
 .page {
   min-height: 100vh;
   font-family: system-ui, sans-serif;
-  background: #eff6ff;
+  background: #f8f8f6;
   color: #1a1a1a;
 }
 
 .header {
-  background: #1a1a1a;
+  background: #0f1e3c;
   color: #fff;
   padding: 1.25rem 1.5rem;
 }
