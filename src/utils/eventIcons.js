@@ -1,7 +1,7 @@
 const EXACT = {
   'Darts': '🎯',
   'Stein, saks, papir': '✂️',
-  'Bomullsdotten': '🌸',
+  'Bomullsdotten': '☁️',
   'Majer': '🃏',
   'Hansa (sanksjon)': '🍺',
   'Bowling': '🎳',
@@ -25,7 +25,7 @@ const EXACT = {
   'Klatring': '🧗',
   'Tautrekking': '💪',
   'Quiz': '🧠',
-  'Beer pong': '🥤',
+  'Beer pong': '🏓',
   'Papirfly': '✈️',
   'Singstar': '🎤',
   'Hot wheels race': '🏎️',
@@ -48,7 +48,7 @@ export function getEventIcon(name) {
   if (l.includes('dart')) return '🎯'
   if (l.includes('stein') || l.includes('saks')) return '✂️'
   if (l.includes('hansa') || l.includes('sanksjon') || l.includes('øl') || l.includes('pils')) return '🍺'
-  if (l.includes('beer') || l.includes('pong')) return '🥤'
+  if (l.includes('beer') || l.includes('pong')) return '🏓'
   if (l.includes('bowl')) return '🎳'
   if (l.includes('golf') || l.includes('disc') || l.includes('frisbee')) return '🥏'
   if (l.includes('fotball') || l.includes('football') || l.includes('soccer') || l.includes('løpeskyt')) return '⚽'
@@ -65,7 +65,7 @@ export function getEventIcon(name) {
   if (l.includes('klatr')) return '🧗'
   if (l.includes('bocce') || l.includes('petanq')) return '⚪'
   if (l.includes('kulest')) return '⚫'
-  if (l.includes('bomull')) return '🌸'
+  if (l.includes('bomull')) return '☁️'
   if (l.includes('tautrekk') || l.includes('styrke')) return '💪'
   if (l.includes('balanse')) return '🤸'
   if (l.includes('singstar') || l.includes('mikrofon') || l.includes('sang')) return '🎤'
