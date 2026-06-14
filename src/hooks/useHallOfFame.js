@@ -30,6 +30,7 @@ export function useHallOfFame() {
         .from('results')
         .select('participant_id,event_id,placement')
         .in('event_id', eventIds)
+        .limit(10000)
       if (resultsRes.error) return
 
       const eventById = {}

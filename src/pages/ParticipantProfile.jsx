@@ -49,6 +49,7 @@ export default function ParticipantProfile() {
         .from('results')
         .select('*')
         .in('event_id', eventIds)
+        .limit(10000)
       if (rErr) { setError(rErr.message); setLoading(false); return }
 
       const eventById = {}
