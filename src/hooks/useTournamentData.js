@@ -13,7 +13,8 @@ export function useTournamentData(tournamentId, refreshKey = 0) {
     setError(null)
 
     async function load() {
-      const [eventsRes, participantsRes, scaleRes, resultsRes] = await Promise.all([
+      const [tourRes, eventsRes, participantsRes, scaleRes, resultsRes] = await Promise.all([
+        supabase.from('tournaments').select('scoring_direction').eq('id', tournamentId).single(),
         supabase.from('events').select('*').eq('tournament_id', tournamentId).order('sort_order'),
         supabase.from('participants').select('*').eq('tournament_id', tournamentId).order('sort_order'),
         supabase.from('doeng_scale').select('*').eq('tournament_id', tournamentId),
@@ -26,6 +27,8 @@ export function useTournamentData(tournamentId, refreshKey = 0) {
       for (const res of [eventsRes, participantsRes, scaleRes]) {
         if (res.error) { setError(res.error.message); setLoading(false); return }
       }
+
+      const scoringDirection = tourRes.data?.scoring_direction ?? 'asc'
 
       const scale = {}
       scaleRes.data.forEach(r => { scale[r.position] = r.points })
@@ -49,9 +52,13 @@ export function useTournamentData(tournamentId, refreshKey = 0) {
         return { ...p, eventResults, total }
       })
 
-      standings.sort((a, b) => a.total - b.total)
+      if (scoringDirection === 'desc') {
+        standings.sort((a, b) => b.total - a.total)
+      } else {
+        standings.sort((a, b) => a.total - b.total)
+      }
 
-      setData({ events, participants, standings, scale })
+      setData({ events, participants, standings, scale, scoringDirection })
       setLoading(false)
     }
 

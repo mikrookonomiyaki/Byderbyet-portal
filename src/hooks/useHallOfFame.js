@@ -50,12 +50,13 @@ export function useHallOfFame() {
         const participants = participantsRes.data.filter(p => p.tournament_id === t.id)
         if (participants.length === 0) continue
 
-        let minTotal = Infinity
+        const desc = (t.scoring_direction ?? 'asc') === 'desc'
+        let bestTotal = desc ? -Infinity : Infinity
         let winner = null
         for (const p of participants) {
           const total = totalByParticipant[`${t.id}::${p.id}`] ?? 0
-          if (total < minTotal) {
-            minTotal = total
+          if (desc ? total > bestTotal : total < bestTotal) {
+            bestTotal = total
             winner = p.name
           }
         }

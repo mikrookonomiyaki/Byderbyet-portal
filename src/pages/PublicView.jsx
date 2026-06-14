@@ -112,7 +112,7 @@ function EmptyTournament({ year }) {
           <tr>
             <th>#</th>
             <th>Deltaker</th>
-            <th>Doeng</th>
+            <th>Poeng</th>
           </tr>
         </thead>
         <tbody>
@@ -130,7 +130,8 @@ function EmptyTournament({ year }) {
 }
 
 function TournamentView({ data }) {
-  const { events, standings } = data
+  const { events, standings, scoringDirection } = data
+  const scoreLabel = scoringDirection === 'desc' ? 'Poeng' : 'Doeng'
   const [view, setView] = useState('ranking')
 
   return (
@@ -150,13 +151,13 @@ function TournamentView({ data }) {
         </button>
       </div>
 
-      {view === 'ranking' && <RankingTable standings={standings} />}
-      {view === 'detail' && <DetailTable standings={standings} events={events} />}
+      {view === 'ranking' && <RankingTable standings={standings} scoreLabel={scoreLabel} />}
+      {view === 'detail' && <DetailTable standings={standings} events={events} scoreLabel={scoreLabel} />}
     </div>
   )
 }
 
-function RankingTable({ standings }) {
+function RankingTable({ standings, scoreLabel }) {
   return (
     <div className={styles.tableWrap}>
       <table className={styles.table}>
@@ -164,7 +165,7 @@ function RankingTable({ standings }) {
           <tr>
             <th>#</th>
             <th>Deltaker</th>
-            <th>Doeng</th>
+            <th>{scoreLabel}</th>
           </tr>
         </thead>
         <tbody>
@@ -186,7 +187,7 @@ function RankingTable({ standings }) {
   )
 }
 
-function DetailTable({ standings, events }) {
+function DetailTable({ standings, events, scoreLabel }) {
   const days = [...new Set(events.map(e => e.day))].filter(Boolean)
 
   return (
@@ -200,7 +201,7 @@ function DetailTable({ standings, events }) {
                 {day}
               </th>
             ))}
-            <th>Total</th>
+            <th>{scoreLabel}</th>
           </tr>
           <tr>
             <th className={styles.sticky}></th>
