@@ -1,9 +1,9 @@
 const EXACT = {
   'Darts': '🎯',
   'Stein, saks, papir': '✂️',
-  'Bomullsdotten': '🧶',
+  'Bomullsdotten': '🌸',
   'Majer': '🃏',
-  'Hansa': '🍺',
+  'Hansa (sanksjon)': '🍺',
   'Bowling': '🎳',
   'Golf': '⛳',
   'Discgolf': '🥏',
@@ -11,12 +11,13 @@ const EXACT = {
   'Fotball': '⚽',
   'Basketball': '🏀',
   'Tennis': '🎾',
+  'Volleyball': '🏐',
   'Badminton': '🏸',
   'Sjakk': '♟️',
   'Poker': '♠️',
   'Canasta': '🃏',
   'Bocce': '🎱',
-  'Petanque': '🎱',
+  'Petanque': '⚪',
   'Curling': '🥌',
   'Svømming': '🏊',
   'Løping': '🏃',
@@ -24,6 +25,21 @@ const EXACT = {
   'Klatring': '🧗',
   'Tautrekking': '💪',
   'Quiz': '🧠',
+  'Beer pong': '🥤',
+  'Papirfly': '✈️',
+  'Singstar': '🎤',
+  'Hot wheels race': '🏎️',
+  'Halen på grisen': '🐷',
+  'Ballong': '🎈',
+  'Tippelappen': '📋',
+  'Spikern': '🔨',
+  'Kulestøt': '⚫',
+  'Mario kart': '🏎️',
+  'Idealtid': '⏱️',
+  'Løpeskyte': '⚽',
+  'Sykle sakte': '🚴',
+  'Hvor mange': '❓',
+  'Støvelkast': '🥾',
 }
 
 export function getEventIcon(name) {
@@ -31,23 +47,35 @@ export function getEventIcon(name) {
   const l = name.toLowerCase()
   if (l.includes('dart')) return '🎯'
   if (l.includes('stein') || l.includes('saks')) return '✂️'
-  if (l.includes('hansa') || l.includes('øl') || l.includes('pils')) return '🍺'
+  if (l.includes('hansa') || l.includes('sanksjon') || l.includes('øl') || l.includes('pils')) return '🍺'
+  if (l.includes('beer') || l.includes('pong')) return '🥤'
   if (l.includes('bowl')) return '🎳'
   if (l.includes('golf') || l.includes('disc') || l.includes('frisbee')) return '🥏'
-  if (l.includes('fotball') || l.includes('football') || l.includes('soccer')) return '⚽'
+  if (l.includes('fotball') || l.includes('football') || l.includes('soccer') || l.includes('løpeskyt')) return '⚽'
   if (l.includes('basket')) return '🏀'
+  if (l.includes('volley')) return '🏐'
   if (l.includes('tennis')) return '🎾'
   if (l.includes('badminton')) return '🏸'
   if (l.includes('sjakk') || l.includes('chess')) return '♟️'
   if (l.includes('poker') || l.includes('majer') || l.includes('canasta') || l.includes('kort')) return '🃏'
-  if (l.includes('quiz') || l.includes('trivia') || l.includes('kunnskap')) return '🧠'
+  if (l.includes('quiz') || l.includes('trivia') || l.includes('kunnskap') || l.includes('hvor mange') || l.includes('tippe')) return '❓'
   if (l.includes('løp') || l.includes('sprint') || l.includes('run')) return '🏃'
   if (l.includes('svøm')) return '🏊'
-  if (l.includes('sykkel')) return '🚴'
+  if (l.includes('sykl') || l.includes('sykkel')) return '🚴'
   if (l.includes('klatr')) return '🧗'
-  if (l.includes('bocce') || l.includes('petanq')) return '🎱'
-  if (l.includes('bomull')) return '🧶'
+  if (l.includes('bocce') || l.includes('petanq')) return '⚪'
+  if (l.includes('kulest')) return '⚫'
+  if (l.includes('bomull')) return '🌸'
   if (l.includes('tautrekk') || l.includes('styrke')) return '💪'
   if (l.includes('balanse')) return '🤸'
+  if (l.includes('singstar') || l.includes('mikrofon') || l.includes('sang')) return '🎤'
+  if (l.includes('papirfly') || l.includes('papir fly')) return '✈️'
+  if (l.includes('mario') || l.includes('kart') || l.includes('hot wheel')) return '🏎️'
+  if (l.includes('gris')) return '🐷'
+  if (l.includes('ballong')) return '🎈'
+  if (l.includes('spiker')) return '🔨'
+  if (l.includes('støvel')) return '🥾'
+  if (l.includes('idealt')) return '⏱️'
+  if (l.includes('tippelapp')) return '📋'
   return '🏅'
 }

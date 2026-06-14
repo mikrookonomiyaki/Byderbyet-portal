@@ -4,6 +4,9 @@ export const CANONICAL_NAME = {
   'dart': 'Darts',
   'stein, saks og papir': 'Stein, saks, papir',
   'mayer': 'Majer',
+  'hansa': 'Hansa (sanksjon)',
+  'hansa, sanksjon': 'Hansa (sanksjon)',
+  'sanksjon': 'Hansa (sanksjon)',
 }
 
 export function canonicalize(name) {
