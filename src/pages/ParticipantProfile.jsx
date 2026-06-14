@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { canonicalize } from '../eventNames'
 import TrophyIcon from '../components/TrophyIcon'
+import { computeKeywords } from '../utils/playerKeywords'
 import styles from './ParticipantProfile.module.css'
 
 export default function ParticipantProfile() {
@@ -134,9 +135,16 @@ export default function ParticipantProfile() {
 
 function ProfileView({ data }) {
   const { years, byYear, totalDoeng, avgPlacement, etappeseiere, byderbyWins } = data
+  const allResults = Object.values(byYear).flat()
+  const keywords = computeKeywords(allResults)
 
   return (
     <div>
+      {keywords.length > 0 && (
+        <div className={styles.keywords}>
+          {keywords.map(k => <span key={k} className={styles.keyword}>{k}</span>)}
+        </div>
+      )}
       <div className={styles.stats}>
         <div className={styles.stat}>
           <span className={styles.statVal}>{totalDoeng}</span>

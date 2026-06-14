@@ -56,6 +56,9 @@ export default function PublicView() {
           <HallOfFame />
         </div>
         <nav className={styles.nav}>
+          <div className={styles.navLinks}>
+            <Link to="/events" className={`${styles.tab} ${styles.tabNav}`}>Øvelser</Link>
+          </div>
           <div className={styles.activeTabs}>
             {tournaments.filter(t => t.is_active).map(t => (
               <button

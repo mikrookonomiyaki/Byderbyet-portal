@@ -4,6 +4,7 @@ import PublicView from './pages/PublicView.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import EventHistory from './pages/EventHistory.jsx'
+import EventsOverview from './pages/EventsOverview.jsx'
 import ParticipantProfile from './pages/ParticipantProfile.jsx'
 import './transitions.css'
 
@@ -23,6 +24,7 @@ function AnimatedRoutes() {
     <div ref={ref}>
       <Routes location={location}>
         <Route path="/" element={<PublicView />} />
+        <Route path="/events" element={<EventsOverview />} />
         <Route path="/event/:name" element={<EventHistory />} />
         <Route path="/participant/:name" element={<ParticipantProfile />} />
         <Route path="/admin" element={<AdminLogin />} />
