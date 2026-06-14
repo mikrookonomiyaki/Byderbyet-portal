@@ -6,16 +6,31 @@ export function useHallOfFame() {
 
   useEffect(() => {
     async function load() {
-      const [tourRes, participantsRes, eventsRes, scalesRes, resultsRes] = await Promise.all([
-        supabase.from('tournaments').select('*').order('year', { ascending: true }),
-        supabase.from('participants').select('id,tournament_id,name'),
-        supabase.from('events').select('id,tournament_id,is_hansa'),
-        supabase.from('doeng_scale').select('*'),
-        supabase.from('results').select('participant_id,event_id,placement'),
+      const tourRes = await supabase
+        .from('tournaments')
+        .select('*')
+        .eq('is_active', false)
+        .order('year', { ascending: true })
+      if (tourRes.error) return
+      if (tourRes.data.length === 0) { setWinners([]); return }
+
+      const tourIds = tourRes.data.map(t => t.id)
+
+      const [participantsRes, eventsRes, scalesRes] = await Promise.all([
+        supabase.from('participants').select('id,tournament_id,name').in('tournament_id', tourIds),
+        supabase.from('events').select('id,tournament_id,is_hansa').in('tournament_id', tourIds),
+        supabase.from('doeng_scale').select('*').in('tournament_id', tourIds),
       ])
-      for (const r of [tourRes, participantsRes, eventsRes, scalesRes, resultsRes]) {
+      for (const r of [participantsRes, eventsRes, scalesRes]) {
         if (r.error) return
       }
+
+      const eventIds = eventsRes.data.map(e => e.id)
+      const resultsRes = await supabase
+        .from('results')
+        .select('participant_id,event_id,placement')
+        .in('event_id', eventIds)
+      if (resultsRes.error) return
 
       const eventById = {}
       eventsRes.data.forEach(e => { eventById[e.id] = e })
@@ -46,7 +61,6 @@ export function useHallOfFame() {
 
       const result = []
       for (const t of tourRes.data) {
-        if (t.is_active) continue
         const participants = participantsRes.data.filter(p => p.tournament_id === t.id)
         if (participants.length === 0) continue
 

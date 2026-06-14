@@ -16,13 +16,11 @@ export default function ParticipantProfile() {
 
   useEffect(() => {
     async function load() {
-      const [tourRes, allParticipantsRes, eventsRes, scalesRes] = await Promise.all([
+      const [tourRes, allParticipantsRes] = await Promise.all([
         supabase.from('tournaments').select('*').order('year', { ascending: false }),
         supabase.from('participants').select('*'),
-        supabase.from('events').select('*'),
-        supabase.from('doeng_scale').select('*'),
       ])
-      for (const r of [tourRes, allParticipantsRes, eventsRes, scalesRes]) {
+      for (const r of [tourRes, allParticipantsRes]) {
         if (r.error) { setError(r.error.message); setLoading(false); return }
       }
 
@@ -35,8 +33,22 @@ export default function ParticipantProfile() {
         return
       }
 
-      // Fetch ALL results (needed to compute Byderby winners)
-      const { data: allResults, error: rErr } = await supabase.from('results').select('*')
+      // Scope events, scales, and results to only tournaments this player participated in
+      const myTourIds = matchingParticipants.map(p => p.tournament_id)
+
+      const [eventsRes, scalesRes] = await Promise.all([
+        supabase.from('events').select('*').in('tournament_id', myTourIds),
+        supabase.from('doeng_scale').select('*').in('tournament_id', myTourIds),
+      ])
+      for (const r of [eventsRes, scalesRes]) {
+        if (r.error) { setError(r.error.message); setLoading(false); return }
+      }
+
+      const eventIds = eventsRes.data.map(e => e.id)
+      const { data: allResults, error: rErr } = await supabase
+        .from('results')
+        .select('*')
+        .in('event_id', eventIds)
       if (rErr) { setError(rErr.message); setLoading(false); return }
 
       const eventById = {}
