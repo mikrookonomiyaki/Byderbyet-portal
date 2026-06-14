@@ -70,7 +70,7 @@ export default function ParticipantProfile() {
         return event.is_hansa ? result.placement : (scale[result.placement] ?? result.placement)
       }
 
-      // Compute total doeng per participant per tournament
+      // Compute total per participant per tournament (needed for standings and byderby)
       const totalByParticipant = {}
       allResults.forEach(r => {
         const p = participantById[r.participant_id]
@@ -79,10 +79,10 @@ export default function ParticipantProfile() {
         totalByParticipant[key] = (totalByParticipant[key] ?? 0) + calcDoeng(r)
       })
 
-      // Find Byderby-winning years for this participant
       const participantByTournament = {}
       matchingParticipants.forEach(p => { participantByTournament[p.tournament_id] = p })
 
+      // Find Byderby-winning years
       const byderbyWins = []
       for (const tournament of tourRes.data) {
         const myP = participantByTournament[tournament.id]
@@ -96,6 +96,21 @@ export default function ParticipantProfile() {
         if (myTotal === bestTotal) byderbyWins.push(tournament.year)
       }
 
+      // Compute final standing per year
+      const standingByYear = {}
+      tourRes.data.forEach(t => {
+        const myP = participantByTournament[t.id]
+        if (!myP) return
+        const allInTour = allParticipantsRes.data.filter(p => p.tournament_id === t.id)
+        const desc = (t.scoring_direction ?? 'asc') === 'desc'
+        const myTotal = totalByParticipant[`${t.id}::${myP.id}`] ?? 0
+        const rank = allInTour.filter(p => {
+          const pTotal = totalByParticipant[`${t.id}::${p.id}`] ?? 0
+          return desc ? pTotal > myTotal : pTotal < myTotal
+        }).length + 1
+        standingByYear[t.year] = rank
+      })
+
       // Build year -> results for this participant
       const myResultIds = new Set(matchingParticipants.map(p => p.id))
       const byYear = {}
@@ -107,7 +122,7 @@ export default function ParticipantProfile() {
           const tournament = tourRes.data.find(t => t.id === event.tournament_id)
           if (!tournament) return
           if (!byYear[tournament.year]) byYear[tournament.year] = []
-          byYear[tournament.year].push({ event, placement: r.placement, doeng: calcDoeng(r) })
+          byYear[tournament.year].push({ event, placement: r.placement, doeng: calcDoeng(r), year: tournament.year })
         })
 
       const years = tourRes.data
@@ -118,13 +133,12 @@ export default function ParticipantProfile() {
       tourRes.data.forEach(t => { scoringByYear[t.year] = t.scoring_direction ?? 'asc' })
 
       const allMyResults = Object.values(byYear).flat()
-      const totalDoeng = allMyResults.reduce((s, r) => s + r.doeng, 0)
       const avgPlacement = allMyResults.length
         ? (allMyResults.reduce((s, r) => s + r.placement, 0) / allMyResults.length).toFixed(1)
         : null
       const etappeseiere = allMyResults.filter(r => r.placement === 1)
 
-      setData({ name: participantName, years, byYear, totalDoeng, avgPlacement, etappeseiere, byderbyWins, scoringByYear })
+      setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, byderbyWins, scoringByYear, standingByYear })
       setLoading(false)
     }
 
@@ -147,7 +161,7 @@ export default function ParticipantProfile() {
 }
 
 function ProfileView({ data }) {
-  const { years, byYear, totalDoeng, avgPlacement, etappeseiere, byderbyWins, scoringByYear } = data
+  const { years, byYear, avgPlacement, etappeseiere, byderbyWins, scoringByYear, standingByYear } = data
   const allResults = Object.values(byYear).flat()
   const keywords = computeKeywords(allResults)
 
@@ -159,10 +173,6 @@ function ProfileView({ data }) {
         </div>
       )}
       <div className={styles.stats}>
-        <div className={styles.stat}>
-          <span className={styles.statVal}>{totalDoeng}</span>
-          <span className={styles.statLabel}>Totalt</span>
-        </div>
         <div className={styles.stat}>
           <span className={styles.statVal}>{avgPlacement ?? '—'}</span>
           <span className={styles.statLabel}>Snitt plassering</span>
@@ -196,12 +206,12 @@ function ProfileView({ data }) {
           <div className={styles.etappeList}>
             {etappeseiere.map(r => (
               <Link
-                key={r.event.id}
+                key={`${r.event.id}-${r.year}`}
                 to={`/event/${encodeURIComponent(r.event.name)}`}
                 className={styles.etappeChip}
               >
                 {r.event.name}
-                <span className={styles.etappeYear}>({r.event.tournament_id.substring(0, 4)})</span>
+                <span className={styles.etappeYear}>({r.year})</span>
               </Link>
             ))}
           </div>
@@ -212,10 +222,11 @@ function ProfileView({ data }) {
         const results = (byYear[year] ?? []).slice().sort((a, b) => a.placement - b.placement)
         const yearDoeng = results.reduce((s, r) => s + r.doeng, 0)
         const scoreLabel = (scoringByYear[year] ?? 'asc') === 'desc' ? 'Poeng' : 'Doeng'
+        const rank = standingByYear[year]
         return (
           <div key={year} className={styles.yearBlock}>
             <h2 className={styles.yearTitle}>
-              {year} <span className={styles.yearDoeng}>{yearDoeng} {scoreLabel.toLowerCase()}</span>
+              {year} <span className={styles.yearDoeng}>{yearDoeng} {scoreLabel.toLowerCase()} · {rank}. plass</span>
             </h2>
             <div className={styles.tableWrap}>
               <table className={styles.table}>

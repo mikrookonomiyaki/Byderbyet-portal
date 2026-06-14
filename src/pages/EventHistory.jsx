@@ -115,7 +115,7 @@ export default function EventHistory() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <Link to="/" className={styles.back}>← Tilbake</Link>
+        <Link to="/events" className={styles.back}>← Tilbake</Link>
         <h1 className={styles.title}>{data?.eventName ?? eventName}</h1>
         {data && (
           <p className={styles.subtitle}>

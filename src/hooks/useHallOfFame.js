@@ -9,12 +9,12 @@ export function useHallOfFame() {
       const tourRes = await supabase
         .from('tournaments')
         .select('*')
-        .eq('is_active', false)
         .order('year', { ascending: true })
       if (tourRes.error) return
-      if (tourRes.data.length === 0) { setWinners([]); return }
 
-      const tourIds = tourRes.data.map(t => t.id)
+      const inactiveTours = tourRes.data.filter(t => !t.is_active)
+      if (inactiveTours.length === 0) { setWinners([]); return }
+      const tourIds = inactiveTours.map(t => t.id)
 
       const [participantsRes, eventsRes, scalesRes] = await Promise.all([
         supabase.from('participants').select('id,tournament_id,name').in('tournament_id', tourIds),
@@ -60,7 +60,7 @@ export function useHallOfFame() {
       })
 
       const result = []
-      for (const t of tourRes.data) {
+      for (const t of inactiveTours) {
         const participants = participantsRes.data.filter(p => p.tournament_id === t.id)
         if (participants.length === 0) continue
 
