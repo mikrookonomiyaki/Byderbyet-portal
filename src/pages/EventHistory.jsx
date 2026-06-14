@@ -148,7 +148,11 @@ function HistoryTable({ data }) {
         <tbody>
           {sortedNames.map(name => (
             <tr key={name}>
-              <td className={styles.nameCol}>{name}</td>
+              <td className={styles.nameCol}>
+                <Link to={`/participant/${encodeURIComponent(name)}`} className={styles.nameLink}>
+                  {name}
+                </Link>
+              </td>
               {years.map(y => {
                 const r = grid[name][y]
                 return (

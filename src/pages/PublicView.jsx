@@ -49,7 +49,13 @@ export default function PublicView() {
       </div>
       <header className={styles.header}>
         <div className={styles.headerTop}>
-          <div className={styles.brand}>
+          <div
+            className={styles.brand}
+            onClick={() => {
+              const active = tournaments.find(t => t.is_active) ?? tournaments[0]
+              if (active) setSelectedId(active.id)
+            }}
+          >
             <img src="/byderbyet_emblem.png" alt="Byderbyet emblem" className={styles.emblem} />
             <h1 className={styles.title}>Byderbyet</h1>
           </div>
@@ -222,7 +228,11 @@ function DetailTable({ standings, events, scoreLabel }) {
         <tbody>
           {standings.map(p => (
             <tr key={p.id}>
-              <td className={styles.sticky}>{p.name}</td>
+              <td className={styles.sticky}>
+                <Link to={`/participant/${encodeURIComponent(p.name)}`} className={styles.nameLink}>
+                  {p.name}
+                </Link>
+              </td>
               {events.map(e => {
                 const r = p.eventResults[e.id]
                 return (

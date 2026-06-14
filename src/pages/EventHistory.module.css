@@ -82,6 +82,15 @@
   font-weight: 500;
 }
 
+.nameLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.nameLink:hover {
+  text-decoration: underline;
+}
+
 .cell {
   color: #1a1a1a;
 }
