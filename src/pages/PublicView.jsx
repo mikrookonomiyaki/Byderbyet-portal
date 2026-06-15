@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useTournamentData } from '../hooks/useTournamentData'
@@ -138,27 +138,16 @@ function EmptyTournament({ year }) {
 function TournamentView({ data }) {
   const { events, standings, scoringDirection } = data
   const scoreLabel = scoringDirection === 'desc' ? 'Poeng' : 'Doeng'
-  const [view, setView] = useState('ranking')
 
   return (
     <div>
-      <div className={styles.viewToggle}>
-        <button
-          className={`${styles.toggleBtn} ${view === 'ranking' ? styles.active : ''}`}
-          onClick={() => setView('ranking')}
-        >
-          Totalrangering
-        </button>
-        <button
-          className={`${styles.toggleBtn} ${view === 'detail' ? styles.active : ''}`}
-          onClick={() => setView('detail')}
-        >
-          Detaljert
-        </button>
-      </div>
-
-      {view === 'ranking' && <RankingTable standings={standings} scoreLabel={scoreLabel} />}
-      {view === 'detail' && <DetailTable standings={standings} events={events} scoreLabel={scoreLabel} />}
+      <RankingTable standings={standings} scoreLabel={scoreLabel} />
+      {events.length > 0 && (
+        <div className={styles.detailSection}>
+          <p className={styles.detailLabel}>Øvelsesresultater</p>
+          <DetailTable standings={standings} events={events} scoreLabel={scoreLabel} />
+        </div>
+      )}
     </div>
   )
 }
@@ -237,7 +226,7 @@ function DetailTable({ standings, events, scoreLabel }) {
                 const r = p.eventResults[e.id]
                 return (
                   <td key={e.id} className={styles.cell}>
-                    {r ? `${r.placement} (${r.doeng})` : ''}
+                    {r != null ? r.doeng : ''}
                   </td>
                 )
               })}

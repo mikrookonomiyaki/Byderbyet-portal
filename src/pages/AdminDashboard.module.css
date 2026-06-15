@@ -162,6 +162,46 @@
   border-left: 1px solid #e8e8e8;
 }
 
+.draftCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.draftBadge,
+.liveBadge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  cursor: pointer;
+  user-select: none;
+  text-transform: uppercase;
+}
+
+.draftBadge {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.draftBadge:hover {
+  background: #fde68a;
+}
+
+.liveBadge {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+.liveBadge:hover {
+  background: #a7f3d0;
+}
+
 .sticky {
   position: sticky;
   left: 0;

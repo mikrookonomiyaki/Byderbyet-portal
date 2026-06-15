@@ -70,7 +70,7 @@ function TournamentEditor({ tournamentId }) {
   const [refreshKey, setRefreshKey] = useState(0)
   const refresh = useCallback(() => setRefreshKey(k => k + 1), [])
 
-  const { data, loading, error } = useTournamentData(tournamentId, refreshKey)
+  const { data, loading, error } = useTournamentData(tournamentId, refreshKey, { publishedOnly: false })
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(null)
   const [saveSuccess, setSaveSuccess] = useState(false)
@@ -96,6 +96,12 @@ function TournamentEditor({ tournamentId }) {
       [participantId]: { ...prev[participantId], [eventId]: value },
     }))
     setDirty(true)
+  }
+
+  async function togglePublish(event) {
+    const newVal = event.is_published === false
+    await supabase.from('events').update({ is_published: newVal }).eq('id', event.id)
+    refresh()
   }
 
   async function save() {
@@ -156,7 +162,16 @@ function TournamentEditor({ tournamentId }) {
                 <th className={styles.sticky}></th>
                 {events.map(e => (
                   <th key={e.id} className={styles.eventHeader} title={e.name}>
-                    {e.is_hansa ? 'Hansa' : e.name.substring(0, 8)}
+                    <div className={styles.draftCol}>
+                      {e.is_hansa ? 'Hansa' : e.name.substring(0, 8)}
+                      <span
+                        className={e.is_published === false ? styles.draftBadge : styles.liveBadge}
+                        onClick={() => togglePublish(e)}
+                        title={e.is_published === false ? 'Klikk for å publisere' : 'Klikk for å sette som utkast'}
+                      >
+                        {e.is_published === false ? 'Utkast' : 'Live'}
+                      </span>
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -250,6 +265,7 @@ function AddEventForm({ tournamentId, onAdded }) {
   const [name, setName] = useState('')
   const [day, setDay] = useState('Fredag')
   const [isHansa, setIsHansa] = useState(false)
+  const [isPublished, setIsPublished] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
 
@@ -265,6 +281,7 @@ function AddEventForm({ tournamentId, onAdded }) {
       name: name.trim(),
       day,
       is_hansa: isHansa,
+      is_published: isPublished,
       sort_order: 999,
     })
     setSaving(false)
@@ -274,6 +291,7 @@ function AddEventForm({ tournamentId, onAdded }) {
       setName('')
       setDay('Fredag')
       setIsHansa(false)
+      setIsPublished(false)
       setOpen(false)
       onAdded()
     }
@@ -309,6 +327,14 @@ function AddEventForm({ tournamentId, onAdded }) {
               onChange={e => setIsHansa(e.target.checked)}
             />
             Hansa-øvelse
+          </label>
+          <label className={styles.addCheckbox}>
+            <input
+              type="checkbox"
+              checked={isPublished}
+              onChange={e => setIsPublished(e.target.checked)}
+            />
+            Publiser med én gang
           </label>
           <button type="submit" className={styles.addSubmit} disabled={saving}>
             {saving ? '...' : 'Legg til'}
