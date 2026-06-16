@@ -10,7 +10,7 @@ export default function EventsOverview() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.from('events').select('id, name').then(({ data, error }) => {
+    supabase.from('events').select('id, name').eq('is_published', true).limit(10000).then(({ data, error }) => {
       if (error || !data) { setLoading(false); return }
       const counts = {}
       const displayName = {}
