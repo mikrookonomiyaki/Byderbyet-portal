@@ -18,7 +18,7 @@ export default function ParticipantProfile() {
     async function load() {
       const [tourRes, allParticipantsRes] = await Promise.all([
         supabase.from('tournaments').select('*').order('year', { ascending: false }),
-        supabase.from('participants').select('*'),
+        supabase.from('participants').select('*').limit(10000),
       ])
       for (const r of [tourRes, allParticipantsRes]) {
         if (r.error) { setError(r.error.message); setLoading(false); return }
@@ -37,8 +37,8 @@ export default function ParticipantProfile() {
       const myTourIds = matchingParticipants.map(p => p.tournament_id)
 
       const [eventsRes, scalesRes] = await Promise.all([
-        supabase.from('events').select('*').in('tournament_id', myTourIds),
-        supabase.from('doeng_scale').select('*').in('tournament_id', myTourIds),
+        supabase.from('events').select('*').in('tournament_id', myTourIds).limit(10000),
+        supabase.from('doeng_scale').select('*').in('tournament_id', myTourIds).limit(10000),
       ])
       for (const r of [eventsRes, scalesRes]) {
         if (r.error) { setError(r.error.message); setLoading(false); return }
@@ -227,34 +227,41 @@ function ProfileView({ data }) {
         return (
           <div key={year} className={styles.yearBlock}>
             <h2 className={styles.yearTitle}>
-              {year} <span className={styles.yearDoeng}>{yearDoeng} {scoreLabel.toLowerCase()} · {rank}. plass</span>
+              {year}
+              {results.length > 0 && (
+                <span className={styles.yearDoeng}>{yearDoeng} {scoreLabel.toLowerCase()} · {rank}. plass</span>
+              )}
             </h2>
-            <div className={styles.tableWrap}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Øvelse</th>
-                    <th>Dag</th>
-                    <th>Plass</th>
-                    <th>{scoreLabel}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.map(r => (
-                    <tr key={r.event.id} className={r.placement === 1 ? styles.win : ''}>
-                      <td>
-                        <Link to={`/event/${encodeURIComponent(r.event.name)}`} className={styles.eventLink}>
-                          {r.event.name}
-                        </Link>
-                      </td>
-                      <td>{r.event.day}</td>
-                      <td>{r.placement}</td>
-                      <td>{r.doeng}</td>
+            {results.length === 0 ? (
+              <p className={styles.noResults}>Ingen øvelseresultater registrert.</p>
+            ) : (
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Øvelse</th>
+                      <th>Dag</th>
+                      <th>Plass</th>
+                      <th>{scoreLabel}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {results.map(r => (
+                      <tr key={r.event.id} className={r.placement === 1 ? styles.win : ''}>
+                        <td>
+                          <Link to={`/event/${encodeURIComponent(r.event.name)}`} className={styles.eventLink}>
+                            {r.event.name}
+                          </Link>
+                        </td>
+                        <td>{r.event.day}</td>
+                        <td>{r.placement}</td>
+                        <td>{r.doeng}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )
       })}

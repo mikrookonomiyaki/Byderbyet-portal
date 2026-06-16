@@ -13,13 +13,16 @@ export default function EventsOverview() {
     supabase.from('events').select('id, name').then(({ data, error }) => {
       if (error || !data) { setLoading(false); return }
       const counts = {}
+      const displayName = {}
       data.forEach(e => {
-        const name = canonicalize(e.name)
-        counts[name] = (counts[name] ?? 0) + 1
+        const canonical = canonicalize(e.name)
+        const key = canonical.toLowerCase()
+        if (!displayName[key]) displayName[key] = canonical
+        counts[key] = (counts[key] ?? 0) + 1
       })
       const sorted = Object.entries(counts)
         .sort(([, a], [, b]) => b - a)
-        .map(([name, count]) => ({ name, count }))
+        .map(([key, count]) => ({ name: displayName[key], count }))
       setEvents(sorted)
       setLoading(false)
     })
