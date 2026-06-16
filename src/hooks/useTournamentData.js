@@ -22,7 +22,7 @@ export function useTournamentData(tournamentId, refreshKey = 0, { publishedOnly 
         supabase.from('doeng_scale').select('*').eq('tournament_id', tournamentId),
       ])
 
-      for (const res of [eventsRes, participantsRes, scaleRes]) {
+      for (const res of [tourRes, eventsRes, participantsRes, scaleRes]) {
         if (res.error) { setError(res.error.message); setLoading(false); return }
       }
 
@@ -49,7 +49,7 @@ export function useTournamentData(tournamentId, refreshKey = 0, { publishedOnly 
 
       const eventIds = events.map(e => e.id)
       const resultsRes = eventIds.length > 0
-        ? await supabase.from('results').select('event_id, participant_id, placement').in('event_id', eventIds)
+        ? await supabase.from('results').select('event_id, participant_id, placement').in('event_id', eventIds).limit(10000)
         : { data: [] }
 
       if (resultsRes.error) { setError(resultsRes.error.message); setLoading(false); return }

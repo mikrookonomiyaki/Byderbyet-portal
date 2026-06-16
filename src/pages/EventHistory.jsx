@@ -17,7 +17,7 @@ export default function EventHistory() {
       // Load all tournaments, events, participants and results
       const [tourRes, eventsRes] = await Promise.all([
         supabase.from('tournaments').select('*').order('year', { ascending: false }),
-        supabase.from('events').select('*'),
+        supabase.from('events').select('*').eq('is_published', true).limit(10000),
       ])
       if (tourRes.error || eventsRes.error) {
         setError((tourRes.error ?? eventsRes.error).message)
@@ -41,9 +41,9 @@ export default function EventHistory() {
       const relevantTournamentIds = [...new Set(matchingEvents.map(e => e.tournament_id))]
 
       const [scalesRes, participantsRes, resultsRes] = await Promise.all([
-        supabase.from('doeng_scale').select('*').in('tournament_id', relevantTournamentIds),
-        supabase.from('participants').select('*').in('tournament_id', relevantTournamentIds),
-        supabase.from('results').select('*').in('event_id', matchingEvents.map(e => e.id)),
+        supabase.from('doeng_scale').select('*').in('tournament_id', relevantTournamentIds).limit(10000),
+        supabase.from('participants').select('*').in('tournament_id', relevantTournamentIds).limit(10000),
+        supabase.from('results').select('*').in('event_id', matchingEvents.map(e => e.id)).limit(10000),
       ])
 
       if (scalesRes.error || participantsRes.error || resultsRes.error) {
