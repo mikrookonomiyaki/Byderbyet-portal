@@ -359,7 +359,9 @@
 }
 
 .footer {
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 0.75rem 1.5rem;
   font-size: 0.8rem;
   color: #aaa;
@@ -372,6 +374,16 @@
 
 .footer a:hover {
   color: #555;
+}
+
+.faqLink {
+  color: #aaa;
+  text-decoration: none;
+}
+
+.faqLink:hover {
+  color: #555;
+  text-decoration: underline;
 }
 
 @media (max-width: 600px) {

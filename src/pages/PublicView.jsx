@@ -102,6 +102,7 @@ export default function PublicView() {
       </main>
 
       <footer className={styles.footer}>
+        <Link to="/faq" className={styles.faqLink}>Ofte stilte spørsmål om Byderbyet</Link>
         <a href="/admin">Admin</a>
       </footer>
     </div>
