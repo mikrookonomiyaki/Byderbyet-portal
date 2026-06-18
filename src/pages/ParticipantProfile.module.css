@@ -121,8 +121,8 @@
 }
 
 .trophyIcon {
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   flex-shrink: 0;
   color: #3d2000;
 }
@@ -137,8 +137,8 @@
   background: linear-gradient(160deg, #f5d060 0%, #c9a227 45%, #8b6914 100%);
   color: #2d1a00;
   font-weight: 800;
-  font-size: 1rem;
-  padding: 0.3rem 0.9rem;
+  font-size: 1.3rem;
+  padding: 0.4rem 1.2rem;
   border-radius: 6px;
   border: 1px solid #8b6914;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 1px 3px rgba(0,0,0,0.2);
