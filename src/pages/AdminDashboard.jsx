@@ -119,7 +119,26 @@ function TournamentEditor({ tournamentId }) {
     }
   }
 
+  async function saveAllPending() {
+    const upserts = []
+    for (const [participantId, eventMap] of Object.entries(localResults)) {
+      for (const [eventId, value] of Object.entries(eventMap)) {
+        const placement = parseInt(value, 10)
+        if (!isNaN(placement) && placement > 0) {
+          const saved = data.standings.find(p => p.id === participantId)?.eventResults[eventId]?.placement
+          if (saved !== placement) {
+            upserts.push({ event_id: eventId, participant_id: participantId, placement })
+          }
+        }
+      }
+    }
+    if (upserts.length > 0) {
+      await supabase.from('results').upsert(upserts, { onConflict: 'event_id,participant_id' })
+    }
+  }
+
   async function togglePublish(event) {
+    await saveAllPending()
     const newVal = event.is_published === false
     await supabase.from('events').update({ is_published: newVal }).eq('id', event.id)
     refresh()
