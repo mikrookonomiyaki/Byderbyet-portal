@@ -90,8 +90,11 @@ export default function ParticipantProfile() {
 
       // Find Byderby-winning years — use the same RPC as Æresgalleri to guarantee consistency
       const { data: hofData } = await supabase.rpc('hall_of_fame')
+      const completedYears = new Set(
+        tourRes.data.filter(t => t.is_completed !== false).map(t => t.year)
+      )
       const byderbyWins = (hofData ?? [])
-        .filter(w => w.name.toLowerCase() === participantName.toLowerCase())
+        .filter(w => w.name.toLowerCase() === participantName.toLowerCase() && completedYears.has(w.year))
         .map(w => w.year)
 
       // Compute final standing per year
@@ -137,11 +140,11 @@ export default function ParticipantProfile() {
       const etappeseiere = allMyResults.filter(r => r.placement === 1)
 
       const solvAar = Object.entries(standingByYear)
-        .filter(([, rank]) => rank === 2)
+        .filter(([year, rank]) => rank === 2 && completedYears.has(Number(year)))
         .map(([year]) => Number(year))
         .sort((a, b) => b - a)
       const bronseAar = Object.entries(standingByYear)
-        .filter(([, rank]) => rank === 3)
+        .filter(([year, rank]) => rank === 3 && completedYears.has(Number(year)))
         .map(([year]) => Number(year))
         .sort((a, b) => b - a)
 
