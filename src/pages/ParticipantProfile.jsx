@@ -5,7 +5,7 @@ import { canonicalize } from '../eventNames'
 import TrophyIcon from '../components/TrophyIcon'
 import MedalEmblem from '../components/MedalEmblem'
 import MortarboardIcon from '../components/MortarboardIcon'
-import { computeKeywords } from '../utils/playerKeywords'
+import { computeKeywordsFromAllResults } from '../utils/playerKeywords'
 import styles from './ParticipantProfile.module.css'
 
 export default function ParticipantProfile() {
@@ -154,7 +154,9 @@ export default function ParticipantProfile() {
         .map(([year]) => Number(year))
         .sort((a, b) => b - a)
 
-      setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, participantCountByEvent })
+      const keywords = computeKeywordsFromAllResults(participantName, allResults, eventById, participantById, participantCountByEvent)
+
+      setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords })
       setLoading(false)
     }
 
@@ -177,9 +179,8 @@ export default function ParticipantProfile() {
 }
 
 function ProfileView({ data }) {
-  const { years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, participantCountByEvent } = data
+  const { years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords } = data
   const allResults = Object.values(byYear).flat()
-  const keywords = computeKeywords(allResults, participantCountByEvent)
   const hasHansa = allResults.some(r => r.event.name.toLowerCase().includes('sanksjon'))
 
   return (

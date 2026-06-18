@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
-import { getCategoryByKey, getCategory, MIN_ENTRIES, REGULARIZATION, ELITE } from '../utils/playerKeywords'
+import { getCategoryByKey, getCategory, MIN_ENTRIES, REGULARIZATION, ELITE_FRAC, GOOD_FRAC } from '../utils/playerKeywords'
 import { canonicalize } from '../eventNames'
 import MortarboardIcon from '../components/MortarboardIcon'
 import styles from './CategoryView.module.css'
@@ -75,39 +75,45 @@ export default function CategoryView() {
       const rowList = Object.entries(byName).map(([name, { placements, entries, eventNames }]) => {
         const avg = placements.reduce((s, p) => s + p, 0) / placements.length
         const meetsMinimum = key === 'duell' || entries.length >= MIN_ENTRIES
-        let adjective, isElite, sortKey
+        let adjective = null, isElite = false, regAvg
 
         if (key === 'duell') {
           const winRate = placements.filter(p => p === 1).length / placements.length
           isElite = winRate >= 0.6
           adjective = winRate >= 0.6 ? category.elite : winRate >= 0.4 ? category.good : null
-          sortKey = 1 - winRate
+          regAvg = 1 - winRate
         } else {
           const n = entries.length
           const fieldSizes = entries.map(e => countByEvent[e.eventId] ?? 12)
           const avgField = fieldSizes.reduce((s, f) => s + f, 0) / fieldSizes.length
           const priorMean = (avgField + 1) / 2
-          const goodThreshold = avgField / 2
-          const regAvg = (n * avg + REGULARIZATION * priorMean) / (n + REGULARIZATION)
-          // Always use regAvg for sorting so 1-exercise players don't float above badge holders
-          sortKey = regAvg
-          if (meetsMinimum) {
-            isElite = regAvg <= ELITE
-            adjective = regAvg <= ELITE ? category.elite : regAvg <= goodThreshold ? category.good : null
-          }
+          regAvg = (n * avg + REGULARIZATION * priorMean) / (n + REGULARIZATION)
         }
 
         return {
           name,
           adjective,
           isElite,
-          sortKey,
+          meetsMinimum,
+          regAvg,
           count: placements.length,
           eventNames: [...eventNames].sort(),
         }
       })
 
-      rowList.sort((a, b) => a.sortKey - b.sortKey)
+      // Rank-based badge assignment for non-duel categories
+      if (key !== 'duell') {
+        const qualified = rowList.filter(r => r.meetsMinimum).sort((a, b) => a.regAvg - b.regAvg)
+        const n = qualified.length
+        const eliteCount = Math.max(1, Math.ceil(n * ELITE_FRAC))
+        const goodCount  = Math.max(0, Math.floor(n * GOOD_FRAC))
+        qualified.forEach((row, idx) => {
+          if (idx < eliteCount)                    { row.isElite = true;  row.adjective = category.elite }
+          else if (idx < eliteCount + goodCount)   { row.isElite = false; row.adjective = category.good  }
+        })
+      }
+
+      rowList.sort((a, b) => a.regAvg - b.regAvg)
       setRows(rowList)
       setLoading(false)
     }
