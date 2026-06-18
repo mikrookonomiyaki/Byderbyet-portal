@@ -76,7 +76,6 @@ function TournamentEditor({ tournamentId }) {
   const [saveError, setSaveError] = useState(null)
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [localResults, setLocalResults] = useState({})
-  const [dirty, setDirty] = useState(false)
   const [completing, setCompleting] = useState(false)
 
   useEffect(() => {
@@ -89,7 +88,6 @@ function TournamentEditor({ tournamentId }) {
       })
     })
     setLocalResults(map)
-    setDirty(false)
   }, [data])
 
   function handleChange(participantId, eventId, value) {
@@ -97,10 +95,50 @@ function TournamentEditor({ tournamentId }) {
       ...prev,
       [participantId]: { ...prev[participantId], [eventId]: value },
     }))
-    setDirty(true)
+  }
+
+  async function handleBlur(participantId, eventId, value) {
+    const placement = parseInt(value, 10)
+    if (!isNaN(placement) && placement > 0) {
+      setSaving(true)
+      setSaveError(null)
+      const { error } = await supabase.from('results').upsert(
+        [{ event_id: eventId, participant_id: participantId, placement }],
+        { onConflict: 'event_id,participant_id' }
+      )
+      setSaving(false)
+      if (error) {
+        setSaveError(error.message)
+      } else {
+        setSaveSuccess(true)
+        setTimeout(() => setSaveSuccess(false), 2000)
+      }
+    } else if (value === '') {
+      await supabase.from('results').delete()
+        .eq('event_id', eventId).eq('participant_id', participantId)
+    }
+  }
+
+  async function saveAllPending() {
+    const upserts = []
+    for (const [participantId, eventMap] of Object.entries(localResults)) {
+      for (const [eventId, value] of Object.entries(eventMap)) {
+        const placement = parseInt(value, 10)
+        if (!isNaN(placement) && placement > 0) {
+          const saved = data.standings.find(p => p.id === participantId)?.eventResults[eventId]?.placement
+          if (saved !== placement) {
+            upserts.push({ event_id: eventId, participant_id: participantId, placement })
+          }
+        }
+      }
+    }
+    if (upserts.length > 0) {
+      await supabase.from('results').upsert(upserts, { onConflict: 'event_id,participant_id' })
+    }
   }
 
   async function togglePublish(event) {
+    await saveAllPending()
     const newVal = event.is_published === false
     await supabase.from('events').update({ is_published: newVal }).eq('id', event.id)
     refresh()
@@ -109,30 +147,6 @@ function TournamentEditor({ tournamentId }) {
   async function updateEventDay(eventId, day) {
     await supabase.from('events').update({ day: day || null }).eq('id', eventId)
     refresh()
-  }
-
-  async function save() {
-    setSaving(true)
-    setSaveError(null)
-    setSaveSuccess(false)
-    const upserts = []
-    for (const [participantId, events] of Object.entries(localResults)) {
-      for (const [eventId, val] of Object.entries(events)) {
-        const placement = parseInt(val, 10)
-        if (!isNaN(placement) && placement > 0) {
-          upserts.push({ event_id: eventId, participant_id: participantId, placement })
-        }
-      }
-    }
-    const { error } = await supabase.from('results').upsert(upserts, { onConflict: 'event_id,participant_id' })
-    setSaving(false)
-    if (error) {
-      setSaveError(error.message)
-    } else {
-      setDirty(false)
-      setSaveSuccess(true)
-      setTimeout(() => setSaveSuccess(false), 3000)
-    }
   }
 
   async function completeTournament() {
@@ -182,12 +196,9 @@ function TournamentEditor({ tournamentId }) {
 
       {/* Regular events score grid */}
       <div className={styles.toolbar}>
-        <button className={styles.saveBtn} onClick={save} disabled={!dirty || saving}>
-          {saving ? 'Lagrer...' : 'Lagre endringer'}
-        </button>
+        {saving && <span className={styles.savedMuted}>Lagrer...</span>}
+        {saveSuccess && <span className={styles.saved}>Lagret</span>}
         {saveError && <span className={styles.error}>{saveError}</span>}
-        {saveSuccess && <span className={styles.saved}>Lagret!</span>}
-        {!dirty && !saving && !saveSuccess && <span className={styles.savedMuted}>Ingen ulagrede endringer</span>}
       </div>
 
       {events.length > 0 && (
@@ -242,6 +253,7 @@ function TournamentEditor({ tournamentId }) {
                         className={styles.cellInput}
                         value={localResults[p.id]?.[e.id] ?? ''}
                         onChange={ev => handleChange(p.id, e.id, ev.target.value)}
+                        onBlur={ev => handleBlur(p.id, e.id, ev.target.value)}
                       />
                     </td>
                   ))}
@@ -257,7 +269,13 @@ function TournamentEditor({ tournamentId }) {
       </p>
 
       {/* Event day management */}
-      <EventDayManager events={events} onDayChange={updateEventDay} />
+      <EventDayManager
+        events={[
+          ...events,
+          ...(duelEvents ?? []).map(e => ({ ...e, name: `${e.name} (Duell)` })),
+        ]}
+        onDayChange={updateEventDay}
+      />
 
       {/* Duel management */}
       {duelEvents.length > 0 && (

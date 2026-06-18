@@ -135,24 +135,36 @@ function EmptyTournament({ year }) {
   )
 }
 
+const DAY_ORDER_PV = { Fredag: 0, Lørdag: 1, Søndag: 2 }
+
 function TournamentView({ data }) {
-  const { events, standings, scoringDirection } = data
+  const { events, duelEvents, standings, scoringDirection, isCompleted } = data
   const scoreLabel = scoringDirection === 'desc' ? 'Poeng' : 'Doeng'
+
+  const allEvents = [
+    ...events,
+    ...(duelEvents ?? []).map(e => ({ ...e, displayName: `${e.name} (Duell)` })),
+  ].sort((a, b) => {
+    const da = DAY_ORDER_PV[a.day] ?? 99
+    const db = DAY_ORDER_PV[b.day] ?? 99
+    if (da !== db) return da - db
+    return (a.sort_order ?? 0) - (b.sort_order ?? 0)
+  })
 
   return (
     <div>
-      <RankingTable standings={standings} scoreLabel={scoreLabel} />
-      {events.length > 0 && (
+      <RankingTable standings={standings} scoreLabel={scoreLabel} isCompleted={isCompleted} />
+      {allEvents.length > 0 && (
         <div className={styles.detailSection}>
           <p className={styles.detailLabel}>Øvelsesresultater</p>
-          <DetailTable standings={standings} events={events} scoreLabel={scoreLabel} />
+          <DetailTable standings={standings} events={allEvents} scoreLabel={scoreLabel} />
         </div>
       )}
     </div>
   )
 }
 
-function RankingTable({ standings, scoreLabel }) {
+function RankingTable({ standings, scoreLabel, isCompleted }) {
   return (
     <div className={styles.tableWrap}>
       <table className={styles.table}>
@@ -171,7 +183,7 @@ function RankingTable({ standings, scoreLabel }) {
                 <Link to={`/participant/${encodeURIComponent(p.name)}`} className={styles.nameLink}>
                   {p.name}
                 </Link>
-                {i === 0 && <TrophyIcon outline className={styles.trophyIcon} />}
+                {i === 0 && isCompleted && <TrophyIcon outline className={styles.trophyIcon} />}
               </td>
               <td>{p.total}</td>
             </tr>
@@ -184,6 +196,8 @@ function RankingTable({ standings, scoreLabel }) {
 
 function DetailTable({ standings, events, scoreLabel }) {
   const days = [...new Set(events.map(e => e.day))].filter(Boolean)
+    .sort((a, b) => (DAY_ORDER_PV[a] ?? 99) - (DAY_ORDER_PV[b] ?? 99))
+  const noDayCount = events.filter(e => !e.day).length
 
   return (
     <div className={styles.tableWrap}>
@@ -196,7 +210,10 @@ function DetailTable({ standings, events, scoreLabel }) {
                 {day}
               </th>
             ))}
-            <th>{scoreLabel}</th>
+            {noDayCount > 0 && (
+              <th colSpan={noDayCount} className={styles.dayHeader}>Dag ikke satt</th>
+            )}
+            <th>{scoreLabel} totalt</th>
           </tr>
           <tr>
             <th className={styles.sticky}></th>
@@ -205,9 +222,8 @@ function DetailTable({ standings, events, scoreLabel }) {
                 <Link
                   to={`/event/${encodeURIComponent(e.name)}`}
                   className={styles.eventLink}
-                  title={e.name}
                 >
-                  {e.is_hansa ? 'Hansa' : e.name.substring(0, 8)}
+                  {e.displayName ?? e.name}
                 </Link>
               </th>
             ))}
