@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient'
 import { canonicalize } from '../eventNames'
 import TrophyIcon from '../components/TrophyIcon'
 import MedalEmblem from '../components/MedalEmblem'
+import MortarboardIcon from '../components/MortarboardIcon'
 import { computeKeywords } from '../utils/playerKeywords'
 import styles from './ParticipantProfile.module.css'
 
@@ -180,7 +181,12 @@ function ProfileView({ data }) {
     <div>
       {(keywords.length > 0 || hasHansa) && (
         <div className={styles.keywords}>
-          {keywords.map(k => <span key={k} className={styles.keyword}>{k}</span>)}
+          {keywords.map(kw => (
+            <Link key={kw.adjective} to={`/category/${kw.categoryKey}`} className={styles.keywordWrap}>
+              {kw.isElite && <MortarboardIcon className={styles.mortarboard} />}
+              <span className={kw.isElite ? styles.keywordElite : styles.keyword}>{kw.adjective}</span>
+            </Link>
+          ))}
           {hasHansa && <span className={styles.hansaKeyword}>Hansa-dranker</span>}
         </div>
       )}

@@ -6,6 +6,7 @@ import AdminDashboard from './pages/AdminDashboard.jsx'
 import EventHistory from './pages/EventHistory.jsx'
 import EventsOverview from './pages/EventsOverview.jsx'
 import ParticipantProfile from './pages/ParticipantProfile.jsx'
+import CategoryView from './pages/CategoryView.jsx'
 import './transitions.css'
 
 // Take manual control so the browser doesn't interfere with our restoration
@@ -60,6 +61,7 @@ function AnimatedRoutes() {
         <Route path="/events" element={<EventsOverview />} />
         <Route path="/event/:name" element={<EventHistory />} />
         <Route path="/participant/:name" element={<ParticipantProfile />} />
+        <Route path="/category/:key" element={<CategoryView />} />
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
       </Routes>
