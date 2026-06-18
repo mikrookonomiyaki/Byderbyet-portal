@@ -83,19 +83,11 @@ export default function ParticipantProfile() {
       const participantByTournament = {}
       matchingParticipants.forEach(p => { participantByTournament[p.tournament_id] = p })
 
-      // Find Byderby-winning years
-      const byderbyWins = []
-      for (const tournament of tourRes.data) {
-        const myP = participantByTournament[tournament.id]
-        if (!myP) continue
-        const myTotal = totalByParticipant[`${tournament.id}::${myP.id}`] ?? 0
-        const allInTour = allParticipantsRes.data.filter(p => p.tournament_id === tournament.id)
-        if (allInTour.length === 0) continue
-        const desc = (tournament.scoring_direction ?? 'asc') === 'desc'
-        const totals = allInTour.map(p => totalByParticipant[`${tournament.id}::${p.id}`] ?? 0)
-        const bestTotal = desc ? Math.max(...totals) : Math.min(...totals)
-        if (myTotal === bestTotal) byderbyWins.push(tournament.year)
-      }
+      // Find Byderby-winning years — use the same RPC as Æresgalleri to guarantee consistency
+      const { data: hofData } = await supabase.rpc('hall_of_fame')
+      const byderbyWins = (hofData ?? [])
+        .filter(w => w.name.toLowerCase() === participantName.toLowerCase())
+        .map(w => w.year)
 
       // Compute final standing per year
       const standingByYear = {}
