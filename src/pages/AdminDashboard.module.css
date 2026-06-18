@@ -202,6 +202,32 @@
   background: #a7f3d0;
 }
 
+.participantCell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.deleteBtn {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color 0.12s, background 0.12s;
+}
+
+.deleteBtn:hover {
+  color: #c0392b;
+  background: #fef2f2;
+}
+
 .sticky {
   position: sticky;
   left: 0;

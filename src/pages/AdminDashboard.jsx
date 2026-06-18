@@ -111,6 +111,18 @@ function TournamentEditor({ tournamentId }) {
     refresh()
   }
 
+  async function deleteParticipant(participant) {
+    if (!window.confirm(`Slett ${participant.name}? Dette sletter også alle resultater for denne deltakeren.`)) return
+    await supabase.from('participants').delete().eq('id', participant.id)
+    refresh()
+  }
+
+  async function deleteEvent(event) {
+    if (!window.confirm(`Slett øvelsen "${event.name}"? Dette sletter også alle resultater for denne øvelsen.`)) return
+    await supabase.from('events').delete().eq('id', event.id)
+    refresh()
+  }
+
   async function save() {
     setSaving(true)
     setSaveError(null)
@@ -233,7 +245,12 @@ function TournamentEditor({ tournamentId }) {
             <tbody>
               {standings.map(p => (
                 <tr key={p.id}>
-                  <td className={styles.sticky}>{p.name}</td>
+                  <td className={styles.sticky}>
+                    <div className={styles.participantCell}>
+                      {p.name}
+                      <button className={styles.deleteBtn} onClick={() => deleteParticipant(p)} title="Slett deltaker">x</button>
+                    </div>
+                  </td>
                   {events.map(e => (
                     <td key={e.id} className={styles.cell}>
                       <input
@@ -257,7 +274,7 @@ function TournamentEditor({ tournamentId }) {
       </p>
 
       {/* Event day management */}
-      <EventDayManager events={events} onDayChange={updateEventDay} />
+      <EventDayManager events={events} onDayChange={updateEventDay} onDelete={deleteEvent} />
 
       {/* Duel management */}
       {duelEvents.length > 0 && (
@@ -272,11 +289,11 @@ function TournamentEditor({ tournamentId }) {
   )
 }
 
-function EventDayManager({ events, onDayChange }) {
-  const dayOptions = ['Fredag', 'Lørdag', 'Søndag', '']
+function EventDayManager({ events, onDayChange, onDelete }) {
+  const dayOptions = ['Fredag', 'Lørdag', 'Søndag']
   return (
     <div className={styles.dayManager}>
-      <h3 className={styles.sectionHeading}>Endre dag for øvelser</h3>
+      <h3 className={styles.sectionHeading}>Administrer øvelser</h3>
       <div className={styles.dayManagerList}>
         {events.map(e => (
           <div key={e.id} className={styles.dayManagerRow}>
@@ -287,10 +304,11 @@ function EventDayManager({ events, onDayChange }) {
               onChange={ev => onDayChange(e.id, ev.target.value)}
             >
               <option value="">Uvisst</option>
-              {dayOptions.filter(Boolean).map(d => (
+              {dayOptions.map(d => (
                 <option key={d} value={d}>{d}</option>
               ))}
             </select>
+            <button className={styles.deleteBtn} onClick={() => onDelete(e)} title="Slett øvelse">x</button>
           </div>
         ))}
       </div>
