@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
-import { getCategoryByKey, getCategory, MIN_ENTRIES } from '../utils/playerKeywords'
+import { getCategoryByKey, getCategory, MIN_ENTRIES, REGULARIZATION, ELITE } from '../utils/playerKeywords'
 import { canonicalize } from '../eventNames'
 import MortarboardIcon from '../components/MortarboardIcon'
 import styles from './CategoryView.module.css'
-
-const ELITE = 2.5
 
 export default function CategoryView() {
   const { key } = useParams()
@@ -89,12 +87,15 @@ export default function CategoryView() {
           isElite = false
           sortKey = avg
         } else {
+          const n = entries.length
           const fieldSizes = entries.map(e => countByEvent[e.eventId] ?? 12)
-          const avgField = fieldSizes.reduce((s, n) => s + n, 0) / fieldSizes.length
+          const avgField = fieldSizes.reduce((s, f) => s + f, 0) / fieldSizes.length
+          const priorMean = (avgField + 1) / 2
           const goodThreshold = avgField / 2
-          isElite = avg <= ELITE
-          adjective = avg <= ELITE ? category.elite : avg <= goodThreshold ? category.good : null
-          sortKey = avg
+          const regAvg = (n * avg + REGULARIZATION * priorMean) / (n + REGULARIZATION)
+          isElite = regAvg <= ELITE
+          adjective = regAvg <= ELITE ? category.elite : regAvg <= goodThreshold ? category.good : null
+          sortKey = regAvg
         }
 
         return {

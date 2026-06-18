@@ -39,7 +39,7 @@ export default function ParticipantProfile() {
       const myTourIds = matchingParticipants.map(p => p.tournament_id)
 
       const [eventsRes, scalesRes] = await Promise.all([
-        supabase.from('events').select('*').in('tournament_id', myTourIds).limit(10000),
+        supabase.from('events').select('*').in('tournament_id', myTourIds).eq('is_published', true).limit(10000),
         supabase.from('doeng_scale').select('*').in('tournament_id', myTourIds).limit(10000),
       ])
       for (const r of [eventsRes, scalesRes]) {

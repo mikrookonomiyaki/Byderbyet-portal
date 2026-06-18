@@ -1,8 +1,12 @@
-const ELITE = 2.5
+// Raised from 2.5 to 3.5 to account for regularization shrinkage and increase elite count ~50%
+export const ELITE = 3.5
 // Fallback field size when participant counts are unavailable
 const GOOD_FALLBACK_FIELD = 12
 // Minimum number of results in a category before any adjective is awarded
 export const MIN_ENTRIES = 3
+// Bayesian regularization strength: blends observed avg with prior based on sample size.
+// Higher k = more shrinkage for small samples (k=3 means 3 exercises → 50/50 prior/observed).
+export const REGULARIZATION = 3
 
 export const CATEGORIES = [
   {
@@ -121,7 +125,7 @@ export function computeKeywords(results, countByEvent = {}) {
     const avg = placements.reduce((s, p) => s + p, 0) / placements.length
     let adjective = null
     let isElite = false
-    let sortKey = avg
+    let sortKey
 
     if (cat.key === 'duell') {
       const winRate = placements.filter(p => p === 1).length / placements.length
@@ -129,12 +133,19 @@ export function computeKeywords(results, countByEvent = {}) {
       else if (winRate >= 0.4) { adjective = cat.good }
       sortKey = 1 - winRate
     } else {
+      const n = entries.length
       const fieldSizes = entries.map(e => countByEvent[e.eventId] ?? GOOD_FALLBACK_FIELD)
-      const avgField = fieldSizes.reduce((s, n) => s + n, 0) / fieldSizes.length
+      const avgField = fieldSizes.reduce((s, f) => s + f, 0) / fieldSizes.length
+      // Prior: expected placement with no skill = midpoint of the field
+      const priorMean = (avgField + 1) / 2
       const goodThreshold = avgField / 2
+      // Regularized average: shrinks toward prior for small samples, converges to raw avg as n grows.
+      // This corrects the bias where fewer exercises gives a better-looking average.
+      const regAvg = (n * avg + REGULARIZATION * priorMean) / (n + REGULARIZATION)
 
-      if (avg <= ELITE) { adjective = cat.elite; isElite = true }
-      else if (avg <= goodThreshold) { adjective = cat.good }
+      if (regAvg <= ELITE) { adjective = cat.elite; isElite = true }
+      else if (regAvg <= goodThreshold) { adjective = cat.good }
+      sortKey = regAvg
     }
 
     if (adjective) keywords.push({ adjective, isElite, categoryKey: cat.key, sortKey })
