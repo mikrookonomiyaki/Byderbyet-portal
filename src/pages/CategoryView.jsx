@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { getCategoryByKey, getCategory } from '../utils/playerKeywords'
+import { canonicalize } from '../eventNames'
 import MortarboardIcon from '../components/MortarboardIcon'
 import styles from './CategoryView.module.css'
 
 const ELITE = 2.5
-const GOOD  = 5.5
 
 export default function CategoryView() {
   const { key } = useParams()
@@ -33,8 +33,9 @@ export default function CategoryView() {
       // Filter events belonging to this category
       const matchingEvents = eventsRes.data.filter(e => {
         if (key === 'duell') return e.is_duel === true
+        if (e.is_duel || e.is_hansa) return false
         const cat = getCategory(e.name)
-        return cat?.key === key && !e.is_duel
+        return cat?.key === key
       })
 
       if (matchingEvents.length === 0) {
@@ -51,17 +52,29 @@ export default function CategoryView() {
       const participantById = {}
       participantsRes.data.forEach(p => { participantById[p.id] = p })
 
-      // Aggregate placements per player name (across years)
+      const eventById = {}
+      matchingEvents.forEach(e => { eventById[e.id] = { ...e, name: canonicalize(e.name) } })
+
+      // Participant count per event (for relative "above average" threshold)
+      const countByEvent = {}
+      for (const r of results) {
+        countByEvent[r.event_id] = (countByEvent[r.event_id] ?? 0) + 1
+      }
+
+      // Aggregate placements and event names per player name (across years)
       const byName = {}
       for (const r of results) {
         const p = participantById[r.participant_id]
-        if (!p) continue
+        const event = eventById[r.event_id]
+        if (!p || !event) continue
         const name = p.name
-        if (!byName[name]) byName[name] = []
-        byName[name].push(r.placement)
+        if (!byName[name]) byName[name] = { placements: [], entries: [], eventNames: new Set() }
+        byName[name].placements.push(r.placement)
+        byName[name].entries.push({ placement: r.placement, eventId: r.event_id })
+        byName[name].eventNames.add(event.name)
       }
 
-      const rowList = Object.entries(byName).map(([name, placements]) => {
+      const rowList = Object.entries(byName).map(([name, { placements, entries, eventNames }]) => {
         const avg = placements.reduce((s, p) => s + p, 0) / placements.length
         let adjective, isElite, sortKey
 
@@ -71,12 +84,22 @@ export default function CategoryView() {
           adjective = winRate >= 0.6 ? category.elite : winRate >= 0.4 ? category.good : null
           sortKey = 1 - winRate
         } else {
+          const fieldSizes = entries.map(e => countByEvent[e.eventId] ?? 12)
+          const avgField = fieldSizes.reduce((s, n) => s + n, 0) / fieldSizes.length
+          const goodThreshold = avgField / 2
           isElite = avg <= ELITE
-          adjective = avg <= ELITE ? category.elite : avg <= GOOD ? category.good : null
+          adjective = avg <= ELITE ? category.elite : avg <= goodThreshold ? category.good : null
           sortKey = avg
         }
 
-        return { name, adjective, isElite, sortKey, count: placements.length }
+        return {
+          name,
+          adjective,
+          isElite,
+          sortKey,
+          count: placements.length,
+          eventNames: [...eventNames].sort(),
+        }
       })
 
       rowList.sort((a, b) => a.sortKey - b.sortKey)
@@ -118,7 +141,7 @@ export default function CategoryView() {
                   <th>#</th>
                   <th>Deltaker</th>
                   <th>Nivå</th>
-                  <th>{key === 'duell' ? 'Øvelser' : 'Øvelser'}</th>
+                  <th>Øvelser</th>
                 </tr>
               </thead>
               <tbody>
@@ -140,7 +163,9 @@ export default function CategoryView() {
                         </span>
                       ) : <span className={styles.none}>—</span>}
                     </td>
-                    <td className={styles.count}>{row.count}</td>
+                    <td className={styles.eventsList}>
+                      {row.eventNames.join(' · ')}
+                    </td>
                   </tr>
                 ))}
               </tbody>

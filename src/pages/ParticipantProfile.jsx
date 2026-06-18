@@ -134,6 +134,11 @@ export default function ParticipantProfile() {
       const scoringByYear = {}
       tourRes.data.forEach(t => { scoringByYear[t.year] = t.scoring_direction ?? 'asc' })
 
+      const participantCountByEvent = {}
+      allResults.forEach(r => {
+        participantCountByEvent[r.event_id] = (participantCountByEvent[r.event_id] ?? 0) + 1
+      })
+
       const allMyResults = Object.values(byYear).flat()
       const avgPlacement = allMyResults.length
         ? (allMyResults.reduce((s, r) => s + r.placement, 0) / allMyResults.length).toFixed(1)
@@ -149,7 +154,7 @@ export default function ParticipantProfile() {
         .map(([year]) => Number(year))
         .sort((a, b) => b - a)
 
-      setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear })
+      setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, participantCountByEvent })
       setLoading(false)
     }
 
@@ -172,9 +177,9 @@ export default function ParticipantProfile() {
 }
 
 function ProfileView({ data }) {
-  const { years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear } = data
+  const { years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, participantCountByEvent } = data
   const allResults = Object.values(byYear).flat()
-  const keywords = computeKeywords(allResults)
+  const keywords = computeKeywords(allResults, participantCountByEvent)
   const hasHansa = allResults.some(r => r.event.name.toLowerCase().includes('sanksjon'))
 
   return (

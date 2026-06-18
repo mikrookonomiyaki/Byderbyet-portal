@@ -1,5 +1,6 @@
 const ELITE = 2.5
-const GOOD  = 5.5
+// GOOD threshold is dynamic (avg ≤ field median), but falls back to this if no count available
+const GOOD_FALLBACK_FIELD = 12
 
 export const CATEGORIES = [
   {
@@ -70,35 +71,42 @@ export const CATEGORIES = [
 
 export const DUEL_CAT = { key: 'duell', label: 'Duell', elite: 'Gladiator', good: 'Duellant' }
 
-export const ALL_CATEGORIES = [...CATEGORIES, DUEL_CAT]
+// Catch-all for events that don't match any named category
+export const ALLROUND_CAT = { key: 'allround', label: 'Allround', elite: 'Mester', good: 'Allrounder' }
+
+export const ALL_CATEGORIES = [...CATEGORIES, DUEL_CAT, ALLROUND_CAT]
 
 export function getCategoryByKey(key) {
   return ALL_CATEGORIES.find(c => c.key === key) ?? null
 }
 
+// Returns a category for any event name; never returns null (falls back to ALLROUND_CAT)
 export function getCategory(eventName) {
   const lower = eventName.toLowerCase()
   for (const cat of CATEGORIES) {
     if (cat.patterns.some(p => lower.includes(p))) return cat
   }
-  return null
+  return ALLROUND_CAT
 }
 
-// results: array of { event: { name, is_duel }, placement }
-// Returns: { adjective, isElite, categoryKey }[]
-export function computeKeywords(results) {
+// results:       array of { event: { id, name, is_duel, is_hansa }, placement }
+// countByEvent:  optional { [eventId]: number } — participant count per event for relative threshold
+// Returns: { adjective, isElite, categoryKey, sortKey }[] (up to 3, best first)
+export function computeKeywords(results, countByEvent = {}) {
   const stats = {}
 
   for (const r of results) {
+    if (r.event.is_hansa) continue
     const cat = r.event.is_duel ? DUEL_CAT : getCategory(r.event.name)
-    if (!cat) continue
-    if (!stats[cat.key]) stats[cat.key] = { cat, placements: [] }
-    stats[cat.key].placements.push(r.placement)
+    const k = cat.key
+    if (!stats[k]) stats[k] = { cat, entries: [] }
+    stats[k].entries.push({ placement: r.placement, eventId: r.event.id })
   }
 
   const keywords = []
 
-  for (const { cat, placements } of Object.values(stats)) {
+  for (const { cat, entries } of Object.values(stats)) {
+    const placements = entries.map(e => e.placement)
     const avg = placements.reduce((s, p) => s + p, 0) / placements.length
     let adjective = null
     let isElite = false
@@ -110,8 +118,14 @@ export function computeKeywords(results) {
       else if (winRate >= 0.4) { adjective = cat.good }
       sortKey = 1 - winRate
     } else {
+      // "Good" threshold = above the median for this category's field sizes.
+      // Uses actual participant counts when available, falls back to GOOD_FALLBACK_FIELD.
+      const fieldSizes = entries.map(e => countByEvent[e.eventId] ?? GOOD_FALLBACK_FIELD)
+      const avgField = fieldSizes.reduce((s, n) => s + n, 0) / fieldSizes.length
+      const goodThreshold = avgField / 2
+
       if (avg <= ELITE) { adjective = cat.elite; isElite = true }
-      else if (avg <= GOOD) { adjective = cat.good }
+      else if (avg <= goodThreshold) { adjective = cat.good }
     }
 
     if (adjective) keywords.push({ adjective, isElite, categoryKey: cat.key, sortKey })
