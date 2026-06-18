@@ -136,12 +136,12 @@ function EmptyTournament({ year }) {
 }
 
 function TournamentView({ data }) {
-  const { events, standings, scoringDirection } = data
+  const { events, standings, scoringDirection, isCompleted } = data
   const scoreLabel = scoringDirection === 'desc' ? 'Poeng' : 'Doeng'
 
   return (
     <div>
-      <RankingTable standings={standings} scoreLabel={scoreLabel} />
+      <RankingTable standings={standings} scoreLabel={scoreLabel} isCompleted={isCompleted} />
       {events.length > 0 && (
         <div className={styles.detailSection}>
           <p className={styles.detailLabel}>Øvelsesresultater</p>
@@ -152,7 +152,7 @@ function TournamentView({ data }) {
   )
 }
 
-function RankingTable({ standings, scoreLabel }) {
+function RankingTable({ standings, scoreLabel, isCompleted }) {
   return (
     <div className={styles.tableWrap}>
       <table className={styles.table}>
@@ -171,7 +171,7 @@ function RankingTable({ standings, scoreLabel }) {
                 <Link to={`/participant/${encodeURIComponent(p.name)}`} className={styles.nameLink}>
                   {p.name}
                 </Link>
-                {i === 0 && <TrophyIcon outline className={styles.trophyIcon} />}
+                {i === 0 && isCompleted && <TrophyIcon outline className={styles.trophyIcon} />}
               </td>
               <td>{p.total}</td>
             </tr>
@@ -196,7 +196,7 @@ function DetailTable({ standings, events, scoreLabel }) {
                 {day}
               </th>
             ))}
-            <th>{scoreLabel}</th>
+            <th>{scoreLabel} totalt</th>
           </tr>
           <tr>
             <th className={styles.sticky}></th>
