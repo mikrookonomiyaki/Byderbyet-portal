@@ -171,7 +171,7 @@ function ProfileView({ data }) {
   const { years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear } = data
   const allResults = Object.values(byYear).flat()
   const keywords = computeKeywords(allResults)
-  const hasHansa = allResults.some(r => r.event.is_hansa)
+  const hasHansa = allResults.some(r => r.event.name.toLowerCase().includes('sanksjon'))
 
   return (
     <div>
