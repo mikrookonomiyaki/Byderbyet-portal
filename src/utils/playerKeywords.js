@@ -6,9 +6,9 @@ export const MIN_ENTRIES = 2
 // Higher k = more shrinkage for small samples (k=3 means 3 exercises → 50/50 prior/observed).
 export const REGULARIZATION = 3
 // Top fraction of qualified players who receive the elite badge
-export const ELITE_FRAC = 0.20
+export const ELITE_FRAC = 0.10
 // Next fraction of qualified players who receive the good badge
-export const GOOD_FRAC = 0.35
+export const GOOD_FRAC = 0.30
 
 export const CATEGORIES = [
   {

@@ -113,7 +113,12 @@ export default function CategoryView() {
         })
       }
 
-      rowList.sort((a, b) => a.regAvg - b.regAvg)
+      // Qualified players sort before non-qualified to prevent badge holders from
+      // being buried below players with too few entries to earn a badge.
+      rowList.sort((a, b) => {
+        if (a.meetsMinimum !== b.meetsMinimum) return a.meetsMinimum ? -1 : 1
+        return a.regAvg - b.regAvg
+      })
       setRows(rowList)
       setLoading(false)
     }
