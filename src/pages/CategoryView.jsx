@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
-import { getCategoryByKey, getCategory } from '../utils/playerKeywords'
+import { getCategoryByKey, getCategory, MIN_ENTRIES } from '../utils/playerKeywords'
 import { canonicalize } from '../eventNames'
 import MortarboardIcon from '../components/MortarboardIcon'
 import styles from './CategoryView.module.css'
@@ -76,6 +76,7 @@ export default function CategoryView() {
 
       const rowList = Object.entries(byName).map(([name, { placements, entries, eventNames }]) => {
         const avg = placements.reduce((s, p) => s + p, 0) / placements.length
+        const meetsMinimum = key === 'duell' || entries.length >= MIN_ENTRIES
         let adjective, isElite, sortKey
 
         if (key === 'duell') {
@@ -83,6 +84,10 @@ export default function CategoryView() {
           isElite = winRate >= 0.6
           adjective = winRate >= 0.6 ? category.elite : winRate >= 0.4 ? category.good : null
           sortKey = 1 - winRate
+        } else if (!meetsMinimum) {
+          adjective = null
+          isElite = false
+          sortKey = avg
         } else {
           const fieldSizes = entries.map(e => countByEvent[e.eventId] ?? 12)
           const avgField = fieldSizes.reduce((s, n) => s + n, 0) / fieldSizes.length
