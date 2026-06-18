@@ -250,7 +250,13 @@ function TournamentEditor({ tournamentId }) {
       </p>
 
       {/* Event day management */}
-      <EventDayManager events={events} onDayChange={updateEventDay} />
+      <EventDayManager
+        events={[
+          ...events,
+          ...(duelEvents ?? []).map(e => ({ ...e, name: `${e.name} (Duell)` })),
+        ]}
+        onDayChange={updateEventDay}
+      />
 
       {/* Duel management */}
       {duelEvents.length > 0 && (

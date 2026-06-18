@@ -135,6 +135,8 @@ function EmptyTournament({ year }) {
   )
 }
 
+const DAY_ORDER_PV = { Fredag: 0, Lørdag: 1, Søndag: 2 }
+
 function TournamentView({ data }) {
   const { events, duelEvents, standings, scoringDirection, isCompleted } = data
   const scoreLabel = scoringDirection === 'desc' ? 'Poeng' : 'Doeng'
@@ -142,7 +144,12 @@ function TournamentView({ data }) {
   const allEvents = [
     ...events,
     ...(duelEvents ?? []).map(e => ({ ...e, displayName: `${e.name} (Duell)` })),
-  ]
+  ].sort((a, b) => {
+    const da = DAY_ORDER_PV[a.day] ?? 99
+    const db = DAY_ORDER_PV[b.day] ?? 99
+    if (da !== db) return da - db
+    return (a.sort_order ?? 0) - (b.sort_order ?? 0)
+  })
 
   return (
     <div>
@@ -189,6 +196,8 @@ function RankingTable({ standings, scoreLabel, isCompleted }) {
 
 function DetailTable({ standings, events, scoreLabel }) {
   const days = [...new Set(events.map(e => e.day))].filter(Boolean)
+    .sort((a, b) => (DAY_ORDER_PV[a] ?? 99) - (DAY_ORDER_PV[b] ?? 99))
+  const noDayCount = events.filter(e => !e.day).length
 
   return (
     <div className={styles.tableWrap}>
@@ -201,6 +210,9 @@ function DetailTable({ standings, events, scoreLabel }) {
                 {day}
               </th>
             ))}
+            {noDayCount > 0 && (
+              <th colSpan={noDayCount} className={styles.dayHeader}>Dag ikke satt</th>
+            )}
             <th>{scoreLabel} totalt</th>
           </tr>
           <tr>
@@ -210,9 +222,8 @@ function DetailTable({ standings, events, scoreLabel }) {
                 <Link
                   to={`/event/${encodeURIComponent(e.name)}`}
                   className={styles.eventLink}
-                  title={e.displayName ?? e.name}
                 >
-                  {e.is_hansa ? 'Hansa' : e.is_duel ? e.name.substring(0, 5) + ' (D)' : e.name.substring(0, 8)}
+                  {e.displayName ?? e.name}
                 </Link>
               </th>
             ))}

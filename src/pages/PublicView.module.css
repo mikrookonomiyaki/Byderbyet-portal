@@ -291,14 +291,18 @@
 }
 
 .eventHeader {
-  max-width: 80px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.75rem;
-  font-weight: 500;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 600;
   text-transform: none;
   letter-spacing: 0;
   border-left: 1px solid #e8e8e8;
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+  height: 140px;
+  vertical-align: bottom;
+  padding: 0.5rem 0.3rem;
+  text-align: left;
 }
 
 .eventLink {
