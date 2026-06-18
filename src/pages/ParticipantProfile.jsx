@@ -134,8 +134,10 @@ export default function ParticipantProfile() {
         ? (allMyResults.reduce((s, r) => s + r.placement, 0) / allMyResults.length).toFixed(1)
         : null
       const etappeseiere = allMyResults.filter(r => r.placement === 1)
+      const solvmedaljer = allMyResults.filter(r => r.placement === 2)
+      const bronsemedaljer = allMyResults.filter(r => r.placement === 3)
 
-      setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, byderbyWins, scoringByYear, standingByYear })
+      setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, solvmedaljer, bronsemedaljer, byderbyWins, scoringByYear, standingByYear })
       setLoading(false)
     }
 
@@ -158,7 +160,7 @@ export default function ParticipantProfile() {
 }
 
 function ProfileView({ data }) {
-  const { years, byYear, avgPlacement, etappeseiere, byderbyWins, scoringByYear, standingByYear } = data
+  const { years, byYear, avgPlacement, etappeseiere, solvmedaljer, bronsemedaljer, byderbyWins, scoringByYear, standingByYear } = data
   const allResults = Object.values(byYear).flat()
   const keywords = computeKeywords(allResults)
 
@@ -194,6 +196,46 @@ function ProfileView({ data }) {
               <span key={y} className={styles.trophy}>{y}</span>
             ))}
           </div>
+        </div>
+      )}
+
+      {(solvmedaljer.length > 0 || bronsemedaljer.length > 0) && (
+        <div className={styles.medalSection}>
+          <h2 className={styles.sectionTitle}>Medaljer</h2>
+          {solvmedaljer.length > 0 && (
+            <div className={styles.medalRow}>
+              <span className={styles.medalLabel} data-medal="solv">Sølv</span>
+              <div className={styles.etappeList}>
+                {solvmedaljer.map(r => (
+                  <Link
+                    key={`${r.event.id}-${r.year}`}
+                    to={`/event/${encodeURIComponent(r.event.name)}`}
+                    className={styles.solvChip}
+                  >
+                    {r.event.name}
+                    <span className={styles.etappeYear}>({r.year})</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+          {bronsemedaljer.length > 0 && (
+            <div className={styles.medalRow}>
+              <span className={styles.medalLabel} data-medal="bronse">Bronse</span>
+              <div className={styles.etappeList}>
+                {bronsemedaljer.map(r => (
+                  <Link
+                    key={`${r.event.id}-${r.year}`}
+                    to={`/event/${encodeURIComponent(r.event.name)}`}
+                    className={styles.bronseChip}
+                  >
+                    {r.event.name}
+                    <span className={styles.etappeYear}>({r.year})</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
