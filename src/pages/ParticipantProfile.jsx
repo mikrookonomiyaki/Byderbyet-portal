@@ -171,12 +171,14 @@ function ProfileView({ data }) {
   const { years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear } = data
   const allResults = Object.values(byYear).flat()
   const keywords = computeKeywords(allResults)
+  const hasHansa = allResults.some(r => r.event.is_hansa)
 
   return (
     <div>
-      {keywords.length > 0 && (
+      {(keywords.length > 0 || hasHansa) && (
         <div className={styles.keywords}>
           {keywords.map(k => <span key={k} className={styles.keyword}>{k}</span>)}
+          {hasHansa && <span className={styles.hansaKeyword}>Hansa-dranker</span>}
         </div>
       )}
       <div className={styles.stats}>

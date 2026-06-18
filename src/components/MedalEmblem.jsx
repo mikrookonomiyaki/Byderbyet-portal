@@ -2,27 +2,27 @@ export default function MedalEmblem({ year, type }) {
   const id = `medal-${type}-${year}`
 
   const colors = type === 'solv' ? {
-    ribbonA: '#94a3b8',
-    ribbonB: '#64748b',
-    gradHigh: '#f1f5f9',
-    gradMid: '#cbd5e1',
-    gradBase: '#94a3b8',
-    rim: '#64748b',
-    inner: '#475569',
-    text: '#1e293b',
+    ribbonA: '#6c757d',
+    ribbonB: '#495057',
+    gradHigh: '#e2e6ea',
+    gradMid: '#adb5bd',
+    gradBase: '#6c757d',
+    rim: '#495057',
+    inner: '#495057',
+    text: '#212529',
   } : {
-    ribbonA: '#c2956c',
-    ribbonB: '#92400e',
-    gradHigh: '#fef3c7',
-    gradMid: '#f59e0b',
-    gradBase: '#cd7f32',
-    rim: '#92400e',
-    inner: '#92400e',
-    text: '#451a03',
+    ribbonA: '#a07828',
+    ribbonB: '#6b4f10',
+    gradHigh: '#e8cfa0',
+    gradMid: '#b8860b',
+    gradBase: '#8b6914',
+    rim: '#6b4f10',
+    inner: '#6b4f10',
+    text: '#3d2b00',
   }
 
   return (
-    <svg viewBox="0 0 44 64" width="44" height="64" xmlns="http://www.w3.org/2000/svg" aria-label={`${type === 'solv' ? 'Sølv' : 'Bronse'} ${year}`}>
+    <svg viewBox="0 0 44 64" width="35" height="51" xmlns="http://www.w3.org/2000/svg" aria-label={`${type === 'solv' ? 'Sølv' : 'Bronse'} ${year}`}>
       <defs>
         <radialGradient id={`${id}-grad`} cx="35%" cy="30%" r="65%">
           <stop offset="0%" stopColor={colors.gradHigh} />
