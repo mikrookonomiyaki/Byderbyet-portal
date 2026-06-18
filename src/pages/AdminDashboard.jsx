@@ -228,7 +228,12 @@ function TournamentEditor({ tournamentId }) {
             <tbody>
               {standings.map(p => (
                 <tr key={p.id}>
-                  <td className={styles.sticky}>{p.name}</td>
+                  <td className={styles.sticky}>
+                    <div className={styles.participantCell}>
+                      {p.name}
+                      <button className={styles.deleteBtn} onClick={() => deleteParticipant(p)} title="Slett deltaker">x</button>
+                    </div>
+                  </td>
                   {events.map(e => (
                     <td key={e.id} className={styles.cell}>
                       <input
