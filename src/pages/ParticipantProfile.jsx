@@ -44,13 +44,17 @@ export default function ParticipantProfile() {
         if (r.error) { setError(r.error.message); setLoading(false); return }
       }
 
-      const eventIds = eventsRes.data.map(e => e.id)
-      const { data: allResults, error: rErr } = await supabase
-        .from('results')
-        .select('*')
-        .in('event_id', eventIds)
-        .limit(10000)
-      if (rErr) { setError(rErr.message); setLoading(false); return }
+      // Fetch results per tournament to avoid the 1000-row Supabase page cap
+      // A single cross-year query can exceed 1000 rows and silently truncate.
+      const allResults = []
+      for (const tourId of myTourIds) {
+        const tourEventIds = eventsRes.data.filter(e => e.tournament_id === tourId).map(e => e.id)
+        if (tourEventIds.length === 0) continue
+        const { data: tourResults, error: rErr } = await supabase
+          .from('results').select('*').in('event_id', tourEventIds).limit(10000)
+        if (rErr) { setError(rErr.message); setLoading(false); return }
+        allResults.push(...tourResults)
+      }
 
       const eventById = {}
       eventsRes.data.forEach(e => { eventById[e.id] = { ...e, name: canonicalize(e.name) } })
@@ -130,19 +134,6 @@ export default function ParticipantProfile() {
         ? (allMyResults.reduce((s, r) => s + r.placement, 0) / allMyResults.length).toFixed(1)
         : null
       const etappeseiere = allMyResults.filter(r => r.placement === 1)
-
-      // DEBUG: log counts to help diagnose missing historical data
-      console.log('[Profile debug]', {
-        tournaments: tourRes.data.map(t => ({ id: t.id, year: t.year })),
-        myTourIds,
-        eventsLoaded: eventsRes.data.length,
-        eventsPerTour: Object.fromEntries(
-          myTourIds.map(id => [id, eventsRes.data.filter(e => e.tournament_id === id).length])
-        ),
-        allResultsCount: allResults.length,
-        myResultsCount: allResults.filter(r => myResultIds.has(r.participant_id)).length,
-        byYear: Object.fromEntries(Object.entries(byYear).map(([y, rs]) => [y, rs.length])),
-      })
 
       setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, byderbyWins, scoringByYear, standingByYear })
       setLoading(false)
