@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
-import { getCategoryByKey, getCategory, MIN_ENTRIES, REGULARIZATION, ELITE_FRAC, GOOD_FRAC } from '../utils/playerKeywords'
+import { getCategoryByKey, getCategory, MIN_ENTRIES, REGULARIZATION, ELITE_COUNT, GOOD_FRAC } from '../utils/playerKeywords'
 import { canonicalize } from '../eventNames'
 import MortarboardIcon from '../components/MortarboardIcon'
 import styles from './CategoryView.module.css'
@@ -105,8 +105,8 @@ export default function CategoryView() {
       if (key !== 'duell') {
         const qualified = rowList.filter(r => r.meetsMinimum).sort((a, b) => a.regAvg - b.regAvg)
         const n = qualified.length
-        const eliteCount = Math.min(n, Math.max(2, Math.ceil(n * ELITE_FRAC)))
-        const goodCount  = Math.min(n - eliteCount, Math.max(2, Math.floor(n * GOOD_FRAC)))
+        const eliteCount = Math.min(n, ELITE_COUNT)
+        const goodCount  = Math.min(n - eliteCount, Math.round(n * GOOD_FRAC))
         qualified.forEach((row, idx) => {
           if (idx < eliteCount)                    { row.isElite = true;  row.adjective = category.elite }
           else if (idx < eliteCount + goodCount)   { row.isElite = false; row.adjective = category.good  }

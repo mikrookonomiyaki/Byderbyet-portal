@@ -5,10 +5,10 @@ export const MIN_ENTRIES = 2
 // Bayesian regularization strength: blends observed avg with prior based on sample size.
 // Higher k = more shrinkage for small samples (k=3 means 3 exercises → 50/50 prior/observed).
 export const REGULARIZATION = 3
-// Top fraction of qualified players who receive the elite badge
-export const ELITE_FRAC = 0.10
-// Next fraction of qualified players who receive the good badge
-export const GOOD_FRAC = 0.30
+// Exactly this many qualified players receive the elite badge (when enough players exist)
+export const ELITE_COUNT = 2
+// Fraction of qualified players who receive the good badge (after the elite slots)
+export const GOOD_FRAC = 0.35
 
 export const CATEGORIES = [
   {
@@ -114,10 +114,10 @@ function computeRegAvg(entries, countByEvent) {
 }
 
 // Assign elite/good badge based on rank among qualified players.
-// Minimums of 2 elite and 2 good apply whenever there are enough players.
+// Always exactly ELITE_COUNT elite badges (fewer only if not enough players).
 function assignBadge(rank, total, cat) {
-  const eliteCount = Math.min(total, Math.max(2, Math.ceil(total * ELITE_FRAC)))
-  const goodCount  = Math.min(total - eliteCount, Math.max(2, Math.floor(total * GOOD_FRAC)))
+  const eliteCount = Math.min(total, ELITE_COUNT)
+  const goodCount  = Math.min(total - eliteCount, Math.round(total * GOOD_FRAC))
   if (rank <= eliteCount) return { adjective: cat.elite, isElite: true }
   if (rank <= eliteCount + goodCount) return { adjective: cat.good, isElite: false }
   return { adjective: null, isElite: false }
