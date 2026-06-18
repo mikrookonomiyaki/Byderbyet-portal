@@ -355,6 +355,8 @@ function DuelEditor({ duelEvents, standings, onRefresh }) {
   )
 }
 
+const DUEL_DAYS = ['Fredag', 'Lørdag', 'Søndag']
+
 function DuelCard({ duel, standings, onRefresh }) {
   // Find existing participants in this duel from standings
   const existing = standings
@@ -365,6 +367,7 @@ function DuelCard({ duel, standings, onRefresh }) {
   const [p1Id, setP1Id] = useState(existing[0]?.id ?? '')
   const [p2Id, setP2Id] = useState(existing[1]?.id ?? '')
   const [winnerId, setWinnerId] = useState(existing[0]?.id ?? '')
+  const [day, setDay] = useState(duel.day ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
   const [editing, setEditing] = useState(existing.length === 0)
@@ -379,7 +382,7 @@ function DuelCard({ duel, standings, onRefresh }) {
   }, [duel.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function saveDuel() {
-    if (!p1Id || !p2Id || p1Id === p2Id || !winnerId) return
+    if (!p1Id || !p2Id || p1Id === p2Id || !winnerId || !day) return
     setSaving(true)
     setError(null)
     const loserId = winnerId === p1Id ? p2Id : p1Id
@@ -398,8 +401,8 @@ function DuelCard({ duel, standings, onRefresh }) {
       await supabase.from('results').delete().eq('event_id', duel.id).eq('participant_id', sp.id)
     }
 
-    // Auto-publish the duel
-    await supabase.from('events').update({ is_published: true }).eq('id', duel.id)
+    // Save day and auto-publish
+    await supabase.from('events').update({ is_published: true, day }).eq('id', duel.id)
     setSaving(false)
     setEditing(false)
     onRefresh()
@@ -476,12 +479,19 @@ function DuelCard({ duel, standings, onRefresh }) {
               </div>
             </div>
           )}
+          <label className={styles.duelLabel}>
+            Dag
+            <select className={styles.duelSelect} value={day} onChange={e => setDay(e.target.value)}>
+              <option value="">Velg dag</option>
+              {DUEL_DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </label>
           {error && <p className={styles.error}>{error}</p>}
           <div className={styles.duelFormBtns}>
             <button
               className={styles.duelSaveBtn}
               onClick={saveDuel}
-              disabled={saving || !p1Id || !p2Id || p1Id === p2Id || !winnerId}
+              disabled={saving || !p1Id || !p2Id || p1Id === p2Id || !winnerId || !day}
             >
               {saving ? 'Lagrer...' : 'Lagre og publiser'}
             </button>

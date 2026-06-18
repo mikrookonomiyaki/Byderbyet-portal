@@ -219,12 +219,14 @@ function DetailTable({ standings, events, scoreLabel }) {
             <th className={styles.sticky}></th>
             {events.map(e => (
               <th key={e.id} className={styles.eventHeader}>
-                <Link
-                  to={`/event/${encodeURIComponent(e.name)}`}
-                  className={styles.eventLink}
-                >
-                  {e.displayName ?? e.name}
-                </Link>
+                <div className={styles.eventHeaderInner}>
+                  <Link
+                    to={`/event/${encodeURIComponent(e.name)}`}
+                    className={styles.eventLink}
+                  >
+                    {e.displayName ?? e.name}
+                  </Link>
+                </div>
               </th>
             ))}
             <th></th>
