@@ -105,8 +105,8 @@ export default function CategoryView() {
       if (key !== 'duell') {
         const qualified = rowList.filter(r => r.meetsMinimum).sort((a, b) => a.regAvg - b.regAvg)
         const n = qualified.length
-        const eliteCount = Math.max(1, Math.ceil(n * ELITE_FRAC))
-        const goodCount  = Math.max(0, Math.floor(n * GOOD_FRAC))
+        const eliteCount = Math.min(n, Math.max(2, Math.ceil(n * ELITE_FRAC)))
+        const goodCount  = Math.min(n - eliteCount, Math.max(2, Math.floor(n * GOOD_FRAC)))
         qualified.forEach((row, idx) => {
           if (idx < eliteCount)                    { row.isElite = true;  row.adjective = category.elite }
           else if (idx < eliteCount + goodCount)   { row.isElite = false; row.adjective = category.good  }

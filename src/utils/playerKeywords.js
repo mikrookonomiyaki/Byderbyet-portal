@@ -113,10 +113,11 @@ function computeRegAvg(entries, countByEvent) {
   return (n * avg + REGULARIZATION * priorMean) / (n + REGULARIZATION)
 }
 
-// Assign elite/good badge based on rank among qualified players
+// Assign elite/good badge based on rank among qualified players.
+// Minimums of 2 elite and 2 good apply whenever there are enough players.
 function assignBadge(rank, total, cat) {
-  const eliteCount = Math.max(1, Math.ceil(total * ELITE_FRAC))
-  const goodCount  = Math.max(0, Math.floor(total * GOOD_FRAC))
+  const eliteCount = Math.min(total, Math.max(2, Math.ceil(total * ELITE_FRAC)))
+  const goodCount  = Math.min(total - eliteCount, Math.max(2, Math.floor(total * GOOD_FRAC)))
   if (rank <= eliteCount) return { adjective: cat.elite, isElite: true }
   if (rank <= eliteCount + goodCount) return { adjective: cat.good, isElite: false }
   return { adjective: null, isElite: false }
@@ -183,5 +184,9 @@ export function computeKeywordsFromAllResults(targetName, allResults, eventById,
     if (adjective) keywords.push({ adjective, isElite, categoryKey: catKey, sortKey: targetEntry.regAvg })
   }
 
-  return keywords.sort((a, b) => a.sortKey - b.sortKey).slice(0, 3)
+  // Elite badges always rank above good badges; within each tier, lower sortKey wins.
+  return keywords.sort((a, b) => {
+    if (a.isElite !== b.isElite) return a.isElite ? -1 : 1
+    return a.sortKey - b.sortKey
+  }).slice(0, 3)
 }
