@@ -36,6 +36,7 @@ export default function EventHistory() {
       }
 
       const isHansa = matchingEvents[0].is_hansa
+      const isDuel = matchingEvents[0].is_duel
 
       // Load doeng scales, participants and results for the relevant tournaments
       const relevantTournamentIds = [...new Set(matchingEvents.map(e => e.tournament_id))]
@@ -105,7 +106,7 @@ export default function EventHistory() {
         return avg(a) - avg(b)
       })
 
-      setData({ eventName: canonicalize(eventName), years, grid, sortedNames, isHansa })
+      setData({ eventName: canonicalize(eventName), years, grid, sortedNames, isHansa, isDuel })
       setLoading(false)
     }
 
@@ -134,7 +135,13 @@ export default function EventHistory() {
 }
 
 function HistoryTable({ data }) {
-  const { years, grid, sortedNames } = data
+  const { years, grid, sortedNames, isDuel } = data
+
+  function cellLabel(r) {
+    if (!r) return '—'
+    if (isDuel) return r.placement === 1 ? 'Vinner' : 'Taper'
+    return `${r.placement} (${r.doeng})`
+  }
 
   return (
     <div className={styles.tableWrap}>
@@ -157,7 +164,7 @@ function HistoryTable({ data }) {
                 const r = grid[name][y]
                 return (
                   <td key={y} className={r ? styles.cell : styles.empty}>
-                    {r ? `${r.placement} (${r.doeng})` : '—'}
+                    {cellLabel(r)}
                   </td>
                 )
               })}
