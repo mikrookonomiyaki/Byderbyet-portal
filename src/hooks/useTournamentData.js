@@ -16,7 +16,7 @@ export function useTournamentData(tournamentId, refreshKey = 0, { publishedOnly 
 
     async function load() {
       const [tourRes, eventsRes, participantsRes, scaleRes] = await Promise.all([
-        supabase.from('tournaments').select('scoring_direction').eq('id', tournamentId).single(),
+        supabase.from('tournaments').select('scoring_direction, is_completed').eq('id', tournamentId).single(),
         supabase.from('events').select('*').eq('tournament_id', tournamentId).order('sort_order'),
         supabase.from('participants').select('*').eq('tournament_id', tournamentId).order('sort_order'),
         supabase.from('doeng_scale').select('*').eq('tournament_id', tournamentId),
@@ -27,11 +27,11 @@ export function useTournamentData(tournamentId, refreshKey = 0, { publishedOnly 
       }
 
       const scoringDirection = tourRes.data?.scoring_direction ?? 'asc'
+      const isCompleted = tourRes.data?.is_completed ?? true
 
       const scale = {}
       scaleRes.data.forEach(r => { scale[r.position] = r.points })
 
-      // Sort by day order first, then sort_order within each day
       const allEvents = eventsRes.data.map(e => ({ ...e, name: canonicalize(e.name) }))
       allEvents.sort((a, b) => {
         const da = DAY_ORDER[a.day] ?? 99
@@ -40,26 +40,41 @@ export function useTournamentData(tournamentId, refreshKey = 0, { publishedOnly 
         return (a.sort_order ?? 0) - (b.sort_order ?? 0)
       })
 
-      // Public view only sees published events; admin sees all
-      const events = publishedOnly
+      // All events visible to this view (respects publishedOnly)
+      const visibleEvents = publishedOnly
         ? allEvents.filter(e => e.is_published !== false)
         : allEvents
 
+      // Split into regular events (for display grid) and duel events (separate UI)
+      const events = visibleEvents.filter(e => !e.is_duel)
+      const duelEvents = visibleEvents.filter(e => e.is_duel)
+
       const participants = participantsRes.data
 
-      const eventIds = events.map(e => e.id)
-      const resultsRes = eventIds.length > 0
-        ? await supabase.from('results').select('event_id, participant_id, placement').in('event_id', eventIds).limit(10000)
+      // Fetch results for ALL visible events (regular + duels) so totals include duel doeng
+      const allEventIds = visibleEvents.map(e => e.id)
+      const resultsRes = allEventIds.length > 0
+        ? await supabase.from('results').select('event_id, participant_id, placement').in('event_id', allEventIds).limit(10000)
         : { data: [] }
 
       if (resultsRes.error) { setError(resultsRes.error.message); setLoading(false); return }
 
+      const eventById = {}
+      visibleEvents.forEach(e => { eventById[e.id] = e })
+
       const resultMap = {}
       ;(resultsRes.data ?? []).forEach(r => {
         if (!resultMap[r.participant_id]) resultMap[r.participant_id] = {}
-        const event = events.find(e => e.id === r.event_id)
+        const event = eventById[r.event_id]
         if (!event) return
-        const doeng = event.is_hansa ? r.placement : (scale[r.placement] ?? r.placement)
+        let doeng
+        if (event.is_duel) {
+          doeng = r.placement === 1 ? -5 : 5
+        } else if (event.is_hansa) {
+          doeng = r.placement
+        } else {
+          doeng = scale[r.placement] ?? r.placement
+        }
         resultMap[r.participant_id][r.event_id] = { placement: r.placement, doeng }
       })
 
@@ -75,13 +90,12 @@ export function useTournamentData(tournamentId, refreshKey = 0, { publishedOnly 
         standings.sort((a, b) => a.total - b.total)
       }
 
-      setData({ events, participants, standings, scale, scoringDirection })
+      setData({ events, duelEvents, participants, standings, scale, scoringDirection, isCompleted })
       setLoading(false)
     }
 
     load().catch(err => { setError(err.message); setLoading(false) })
 
-    // Live updates: re-fetch when any result changes for this tournament
     const channel = supabase
       .channel(`results-${tournamentId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'results' }, () => {

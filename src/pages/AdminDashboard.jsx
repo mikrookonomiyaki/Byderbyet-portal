@@ -111,18 +111,6 @@ function TournamentEditor({ tournamentId }) {
     refresh()
   }
 
-  async function deleteParticipant(participant) {
-    if (!window.confirm(`Slett ${participant.name}? Dette sletter også alle resultater for denne deltakeren.`)) return
-    await supabase.from('participants').delete().eq('id', participant.id)
-    refresh()
-  }
-
-  async function deleteEvent(event) {
-    if (!window.confirm(`Slett øvelsen "${event.name}"? Dette sletter også alle resultater for denne øvelsen.`)) return
-    await supabase.from('events').delete().eq('id', event.id)
-    refresh()
-  }
-
   async function save() {
     setSaving(true)
     setSaveError(null)
@@ -170,29 +158,22 @@ function TournamentEditor({ tournamentId }) {
     const order = { Fredag: 0, Lørdag: 1, Søndag: 2 }
     return (order[a] ?? 99) - (order[b] ?? 99)
   })
+  // Also show events with no day assigned
   const hasNullDay = events.some(e => !e.day)
-  const hasResults = standings.some(p => Object.keys(p.eventResults).length > 0)
-  const tournamentStatus = isCompleted ? 'completed' : hasResults ? 'ongoing' : 'notStarted'
 
   return (
     <div>
-      <div className={styles.addSection}>
-        <AddParticipantForm tournamentId={tournamentId} onAdded={refresh} />
-        <AddEventForm tournamentId={tournamentId} onAdded={refresh} />
-      </div>
-
-      {/* Tournament status */}
+      {/* Tournament completion */}
       <div className={styles.completionBar}>
-        <span className={styles[tournamentStatus === 'completed' ? 'statusGreen' : tournamentStatus === 'ongoing' ? 'statusYellow' : 'statusRed']}>
-          {tournamentStatus === 'completed' ? 'Turnering avsluttet' : tournamentStatus === 'ongoing' ? 'Turnering pågår' : 'Turnering ikke påbegynt'}
-        </span>
-        {tournamentStatus === 'ongoing' && (
+        {isCompleted ? (
+          <div className={styles.completedState}>
+            <span className={styles.completedBadge}>Turnering avsluttet</span>
+            <button className={styles.reopenBtn} onClick={reopenTournament}>Gjenåpne</button>
+          </div>
+        ) : (
           <button className={styles.completeBtn} onClick={completeTournament} disabled={completing}>
             {completing ? 'Avslutter...' : 'Avslutt turnering'}
           </button>
-        )}
-        {tournamentStatus === 'completed' && (
-          <button className={styles.reopenBtn} onClick={reopenTournament}>Gjenåpne</button>
         )}
         <span className={styles.completionHint}>
           {isCompleted ? 'Pokaler og medaljer er synlige.' : 'Pokaler og medaljer skjules til turneringen avsluttes.'}
@@ -276,7 +257,7 @@ function TournamentEditor({ tournamentId }) {
       </p>
 
       {/* Event day management */}
-      <EventDayManager events={events} onDayChange={updateEventDay} onDelete={deleteEvent} />
+      <EventDayManager events={events} onDayChange={updateEventDay} />
 
       {/* Duel management */}
       {duelEvents.length > 0 && (
@@ -287,15 +268,19 @@ function TournamentEditor({ tournamentId }) {
         />
       )}
 
+      <div className={styles.addSection}>
+        <AddParticipantForm tournamentId={tournamentId} onAdded={refresh} />
+        <AddEventForm tournamentId={tournamentId} onAdded={refresh} />
+      </div>
     </div>
   )
 }
 
-function EventDayManager({ events, onDayChange, onDelete }) {
-  const dayOptions = ['Fredag', 'Lørdag', 'Søndag']
+function EventDayManager({ events, onDayChange }) {
+  const dayOptions = ['Fredag', 'Lørdag', 'Søndag', '']
   return (
     <div className={styles.dayManager}>
-      <h3 className={styles.sectionHeading}>Administrer øvelser</h3>
+      <h3 className={styles.sectionHeading}>Endre dag for øvelser</h3>
       <div className={styles.dayManagerList}>
         {events.map(e => (
           <div key={e.id} className={styles.dayManagerRow}>
@@ -306,11 +291,10 @@ function EventDayManager({ events, onDayChange, onDelete }) {
               onChange={ev => onDayChange(e.id, ev.target.value)}
             >
               <option value="">Uvisst</option>
-              {dayOptions.map(d => (
+              {dayOptions.filter(Boolean).map(d => (
                 <option key={d} value={d}>{d}</option>
               ))}
             </select>
-            <button className={styles.deleteBtn} onClick={() => onDelete(e)} title="Slett øvelse">x</button>
           </div>
         ))}
       </div>
