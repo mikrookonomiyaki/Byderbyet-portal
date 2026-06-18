@@ -131,6 +131,19 @@ export default function ParticipantProfile() {
         : null
       const etappeseiere = allMyResults.filter(r => r.placement === 1)
 
+      // DEBUG: log counts to help diagnose missing historical data
+      console.log('[Profile debug]', {
+        tournaments: tourRes.data.map(t => ({ id: t.id, year: t.year })),
+        myTourIds,
+        eventsLoaded: eventsRes.data.length,
+        eventsPerTour: Object.fromEntries(
+          myTourIds.map(id => [id, eventsRes.data.filter(e => e.tournament_id === id).length])
+        ),
+        allResultsCount: allResults.length,
+        myResultsCount: allResults.filter(r => myResultIds.has(r.participant_id)).length,
+        byYear: Object.fromEntries(Object.entries(byYear).map(([y, rs]) => [y, rs.length])),
+      })
+
       setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, byderbyWins, scoringByYear, standingByYear })
       setLoading(false)
     }
