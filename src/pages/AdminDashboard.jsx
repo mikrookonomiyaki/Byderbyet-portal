@@ -163,6 +163,11 @@ function TournamentEditor({ tournamentId }) {
 
   return (
     <div>
+      <div className={styles.addSection}>
+        <AddParticipantForm tournamentId={tournamentId} onAdded={refresh} />
+        <AddEventForm tournamentId={tournamentId} onAdded={refresh} />
+      </div>
+
       {/* Tournament completion */}
       <div className={styles.completionBar}>
         {isCompleted ? (
@@ -263,10 +268,6 @@ function TournamentEditor({ tournamentId }) {
         />
       )}
 
-      <div className={styles.addSection}>
-        <AddParticipantForm tournamentId={tournamentId} onAdded={refresh} />
-        <AddEventForm tournamentId={tournamentId} onAdded={refresh} />
-      </div>
     </div>
   )
 }
