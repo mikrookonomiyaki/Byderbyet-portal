@@ -293,26 +293,21 @@
 .eventHeader {
   border-left: 1px solid #e8e8e8;
   padding: 0;
-  width: 32px;
-  min-width: 32px;
-  max-width: 32px;
-  height: 150px;
   vertical-align: bottom;
-  position: relative;
   overflow: hidden;
 }
 
 .eventHeaderInner {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  white-space: nowrap;
-  transform: translateX(-50%) rotate(-90deg);
-  transform-origin: center center;
-  font-size: 0.72rem;
+  display: block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  height: 150px;
+  overflow: hidden;
+  font-size: 0.62rem;
   font-weight: 600;
   text-transform: none;
   letter-spacing: 0;
+  padding: 6px 5px 4px;
 }
 
 .eventLink {
