@@ -65,7 +65,7 @@ export default function AdminLogin() {
         {mode === 'pin' ? (
           <form onSubmit={handlePin} className={styles.form}>
             <label className={styles.label}>
-              PIN
+              Pinkode
               <input
                 type="password"
                 inputMode="numeric"

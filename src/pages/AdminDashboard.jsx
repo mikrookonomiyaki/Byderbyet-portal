@@ -149,6 +149,19 @@ function TournamentEditor({ tournamentId }) {
     refresh()
   }
 
+  async function deleteParticipant(participant) {
+    if (!window.confirm(`Slett ${participant.name}? Dette sletter også alle resultater for denne deltakeren.`)) return
+    await supabase.from('participants').delete().eq('id', participant.id)
+    refresh()
+  }
+
+  async function deleteEvent(event) {
+    if (!window.confirm(`Slett øvelsen "${event.name}"? Dette sletter også alle resultater for denne øvelsen.`)) return
+    await supabase.from('events').delete().eq('id', event.id)
+    refresh()
+  }
+
+
   async function completeTournament() {
     if (!window.confirm('Avslutt turneringen? Dette gjør pokaler og medaljer synlige for alle.')) return
     setCompleting(true)
@@ -177,6 +190,11 @@ function TournamentEditor({ tournamentId }) {
 
   return (
     <div>
+      <div className={styles.addSection}>
+        <AddParticipantForm tournamentId={tournamentId} onAdded={refresh} />
+        <AddEventForm tournamentId={tournamentId} onAdded={refresh} />
+      </div>
+
       {/* Tournament completion */}
       <div className={styles.completionBar}>
         {isCompleted ? (
@@ -229,7 +247,7 @@ function TournamentEditor({ tournamentId }) {
                         onClick={() => togglePublish(e)}
                         title={e.is_published === false ? 'Klikk for å publisere' : 'Klikk for å sette som utkast'}
                       >
-                        {e.is_published === false ? 'Utkast' : 'Live'}
+                        {e.is_published === false ? 'Utkast' : 'Publisert'}
                       </span>
                     </div>
                   </th>
@@ -275,6 +293,7 @@ function TournamentEditor({ tournamentId }) {
           ...(duelEvents ?? []).map(e => ({ ...e, name: `${e.name} (Duell)` })),
         ]}
         onDayChange={updateEventDay}
+        onDelete={deleteEvent}
       />
 
       {/* Duel management */}
@@ -286,19 +305,15 @@ function TournamentEditor({ tournamentId }) {
         />
       )}
 
-      <div className={styles.addSection}>
-        <AddParticipantForm tournamentId={tournamentId} onAdded={refresh} />
-        <AddEventForm tournamentId={tournamentId} onAdded={refresh} />
-      </div>
     </div>
   )
 }
 
-function EventDayManager({ events, onDayChange }) {
-  const dayOptions = ['Fredag', 'Lørdag', 'Søndag', '']
+function EventDayManager({ events, onDayChange, onDelete }) {
+  const dayOptions = ['Fredag', 'Lørdag', 'Søndag']
   return (
     <div className={styles.dayManager}>
-      <h3 className={styles.sectionHeading}>Endre dag for øvelser</h3>
+      <h3 className={styles.sectionHeading}>Administrer øvelser</h3>
       <div className={styles.dayManagerList}>
         {events.map(e => (
           <div key={e.id} className={styles.dayManagerRow}>
@@ -309,10 +324,11 @@ function EventDayManager({ events, onDayChange }) {
               onChange={ev => onDayChange(e.id, ev.target.value)}
             >
               <option value="">Uvisst</option>
-              {dayOptions.filter(Boolean).map(d => (
+              {dayOptions.map(d => (
                 <option key={d} value={d}>{d}</option>
               ))}
             </select>
+            <button className={styles.deleteBtn} onClick={() => onDelete(e)} title="Slett øvelse">x</button>
           </div>
         ))}
       </div>
@@ -339,6 +355,8 @@ function DuelEditor({ duelEvents, standings, onRefresh }) {
   )
 }
 
+const DUEL_DAYS = ['Fredag', 'Lørdag', 'Søndag']
+
 function DuelCard({ duel, standings, onRefresh }) {
   // Find existing participants in this duel from standings
   const existing = standings
@@ -349,6 +367,7 @@ function DuelCard({ duel, standings, onRefresh }) {
   const [p1Id, setP1Id] = useState(existing[0]?.id ?? '')
   const [p2Id, setP2Id] = useState(existing[1]?.id ?? '')
   const [winnerId, setWinnerId] = useState(existing[0]?.id ?? '')
+  const [day, setDay] = useState(duel.day ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
   const [editing, setEditing] = useState(existing.length === 0)
@@ -363,7 +382,7 @@ function DuelCard({ duel, standings, onRefresh }) {
   }, [duel.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function saveDuel() {
-    if (!p1Id || !p2Id || p1Id === p2Id || !winnerId) return
+    if (!p1Id || !p2Id || p1Id === p2Id || !winnerId || !day) return
     setSaving(true)
     setError(null)
     const loserId = winnerId === p1Id ? p2Id : p1Id
@@ -382,8 +401,8 @@ function DuelCard({ duel, standings, onRefresh }) {
       await supabase.from('results').delete().eq('event_id', duel.id).eq('participant_id', sp.id)
     }
 
-    // Auto-publish the duel
-    await supabase.from('events').update({ is_published: true }).eq('id', duel.id)
+    // Save day and auto-publish
+    await supabase.from('events').update({ is_published: true, day }).eq('id', duel.id)
     setSaving(false)
     setEditing(false)
     onRefresh()
@@ -392,6 +411,17 @@ function DuelCard({ duel, standings, onRefresh }) {
   async function togglePublish() {
     const newVal = duel.is_published === false
     await supabase.from('events').update({ is_published: newVal }).eq('id', duel.id)
+    onRefresh()
+  }
+
+  async function wipeOut() {
+    await supabase.from('results').delete().eq('event_id', duel.id)
+    await supabase.from('events').update({ is_published: false }).eq('id', duel.id)
+    setP1Id('')
+    setP2Id('')
+    setWinnerId('')
+    setDay('')
+    setEditing(false)
     onRefresh()
   }
 
@@ -407,7 +437,7 @@ function DuelCard({ duel, standings, onRefresh }) {
           onClick={togglePublish}
           title={duel.is_published === false ? 'Klikk for å publisere' : 'Klikk for å sette som utkast'}
         >
-          {duel.is_published === false ? 'Utkast' : 'Live'}
+          {duel.is_published === false ? 'Utkast' : 'Publisert'}
         </span>
       </div>
 
@@ -417,7 +447,10 @@ function DuelCard({ duel, standings, onRefresh }) {
           <span className={styles.duelVs}>vs</span>
           <span className={styles.duelLoser}>{loser.name}</span>
           <div className={styles.duelResultLabel}>Vinner: {winner.name}</div>
-          <button className={styles.duelEditBtn} onClick={() => setEditing(true)}>Rediger</button>
+          <div className={styles.duelResultBtns}>
+            <button className={styles.duelEditBtn} onClick={() => setEditing(true)}>Rediger</button>
+            <button className={styles.duelWipeBtn} onClick={wipeOut}>Visk ut</button>
+          </div>
         </div>
       ) : (
         <div className={styles.duelForm}>
@@ -460,12 +493,19 @@ function DuelCard({ duel, standings, onRefresh }) {
               </div>
             </div>
           )}
+          <label className={styles.duelLabel}>
+            Dag
+            <select className={styles.duelSelect} value={day} onChange={e => setDay(e.target.value)}>
+              <option value="">Velg dag</option>
+              {DUEL_DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </label>
           {error && <p className={styles.error}>{error}</p>}
           <div className={styles.duelFormBtns}>
             <button
               className={styles.duelSaveBtn}
               onClick={saveDuel}
-              disabled={saving || !p1Id || !p2Id || p1Id === p2Id || !winnerId}
+              disabled={saving || !p1Id || !p2Id || p1Id === p2Id || !winnerId || !day}
             >
               {saving ? 'Lagrer...' : 'Lagre og publiser'}
             </button>

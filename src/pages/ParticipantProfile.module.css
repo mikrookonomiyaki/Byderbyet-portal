@@ -64,6 +64,27 @@
   gap: 0.5rem;
   flex-wrap: wrap;
   margin-bottom: 1.5rem;
+  align-items: flex-end;
+}
+
+.keywordWrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  gap: 2px;
+}
+
+.keywordWrap:hover .keyword,
+.keywordWrap:hover .keywordElite {
+  opacity: 0.75;
+}
+
+.mortarboard {
+  width: 13px;
+  height: 13px;
+  color: #f59e0b;
+  flex-shrink: 0;
 }
 
 .keyword {
@@ -74,6 +95,17 @@
   padding: 0.3rem 0.85rem;
   border-radius: 20px;
   letter-spacing: 0.02em;
+}
+
+.keywordElite {
+  background: #1a1a1a;
+  color: #fef3c7;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.3rem 0.85rem;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+  border: 1px solid #f59e0b;
 }
 
 .hansaKeyword {

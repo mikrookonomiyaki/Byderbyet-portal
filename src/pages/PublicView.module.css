@@ -291,18 +291,23 @@
 }
 
 .eventHeader {
-  white-space: nowrap;
-  font-size: 0.72rem;
+  border-left: 1px solid #e8e8e8;
+  padding: 0;
+  vertical-align: bottom;
+  overflow: hidden;
+}
+
+.eventHeaderInner {
+  display: block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  height: 150px;
+  overflow: hidden;
+  font-size: 0.62rem;
   font-weight: 600;
   text-transform: none;
   letter-spacing: 0;
-  border-left: 1px solid #e8e8e8;
-  writing-mode: vertical-lr;
-  transform: rotate(180deg);
-  height: 140px;
-  vertical-align: bottom;
-  padding: 0.5rem 0.3rem;
-  text-align: left;
+  padding: 6px 5px 4px;
 }
 
 .eventLink {
@@ -354,7 +359,9 @@
 }
 
 .footer {
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 0.75rem 1.5rem;
   font-size: 0.8rem;
   color: #aaa;
@@ -367,6 +374,16 @@
 
 .footer a:hover {
   color: #555;
+}
+
+.faqLink {
+  color: #aaa;
+  text-decoration: none;
+}
+
+.faqLink:hover {
+  color: #555;
+  text-decoration: underline;
 }
 
 @media (max-width: 600px) {

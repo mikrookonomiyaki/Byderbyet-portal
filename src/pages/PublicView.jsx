@@ -56,7 +56,7 @@ export default function PublicView() {
               if (active) setSelectedId(active.id)
             }}
           >
-            <img src="/byderbyet_emblem.png" alt="Byderbyet emblem" className={styles.emblem} />
+            <img src="/byderbyet_emblem.png" alt="Byderbyet-emblem" className={styles.emblem} />
             <h1 className={styles.title}>Byderbyet</h1>
           </div>
           <HallOfFame />
@@ -102,6 +102,7 @@ export default function PublicView() {
       </main>
 
       <footer className={styles.footer}>
+        <Link to="/faq" className={styles.faqLink}>Ofte stilte spørsmål om Byderbyet</Link>
         <a href="/admin">Admin</a>
       </footer>
     </div>
@@ -219,12 +220,14 @@ function DetailTable({ standings, events, scoreLabel }) {
             <th className={styles.sticky}></th>
             {events.map(e => (
               <th key={e.id} className={styles.eventHeader}>
-                <Link
-                  to={`/event/${encodeURIComponent(e.name)}`}
-                  className={styles.eventLink}
-                >
-                  {e.displayName ?? e.name}
-                </Link>
+                <div className={styles.eventHeaderInner}>
+                  <Link
+                    to={`/event/${encodeURIComponent(e.name)}`}
+                    className={styles.eventLink}
+                  >
+                    {e.displayName ?? e.name}
+                  </Link>
+                </div>
               </th>
             ))}
             <th></th>

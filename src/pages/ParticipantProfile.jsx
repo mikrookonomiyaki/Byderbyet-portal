@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient'
 import { canonicalize } from '../eventNames'
 import TrophyIcon from '../components/TrophyIcon'
 import MedalEmblem from '../components/MedalEmblem'
+import MortarboardIcon from '../components/MortarboardIcon'
 import { computeKeywords } from '../utils/playerKeywords'
 import styles from './ParticipantProfile.module.css'
 
@@ -133,6 +134,11 @@ export default function ParticipantProfile() {
       const scoringByYear = {}
       tourRes.data.forEach(t => { scoringByYear[t.year] = t.scoring_direction ?? 'asc' })
 
+      const participantCountByEvent = {}
+      allResults.forEach(r => {
+        participantCountByEvent[r.event_id] = (participantCountByEvent[r.event_id] ?? 0) + 1
+      })
+
       const allMyResults = Object.values(byYear).flat()
       const avgPlacement = allMyResults.length
         ? (allMyResults.reduce((s, r) => s + r.placement, 0) / allMyResults.length).toFixed(1)
@@ -148,7 +154,7 @@ export default function ParticipantProfile() {
         .map(([year]) => Number(year))
         .sort((a, b) => b - a)
 
-      setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear })
+      setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, participantCountByEvent })
       setLoading(false)
     }
 
@@ -171,16 +177,21 @@ export default function ParticipantProfile() {
 }
 
 function ProfileView({ data }) {
-  const { years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear } = data
+  const { years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, participantCountByEvent } = data
   const allResults = Object.values(byYear).flat()
-  const keywords = computeKeywords(allResults)
+  const keywords = computeKeywords(allResults, participantCountByEvent)
   const hasHansa = allResults.some(r => r.event.name.toLowerCase().includes('sanksjon'))
 
   return (
     <div>
       {(keywords.length > 0 || hasHansa) && (
         <div className={styles.keywords}>
-          {keywords.map(k => <span key={k} className={styles.keyword}>{k}</span>)}
+          {keywords.map(kw => (
+            <Link key={kw.adjective} to={`/category/${kw.categoryKey}`} className={styles.keywordWrap}>
+              {kw.isElite && <MortarboardIcon className={styles.mortarboard} />}
+              <span className={kw.isElite ? styles.keywordElite : styles.keyword}>{kw.adjective}</span>
+            </Link>
+          ))}
           {hasHansa && <span className={styles.hansaKeyword}>Hansa-dranker</span>}
         </div>
       )}
