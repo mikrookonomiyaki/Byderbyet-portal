@@ -1,19 +1,23 @@
 const ELITE = 2.5
-// GOOD threshold is dynamic (avg ≤ field median), but falls back to this if no count available
+// Fallback field size when participant counts are unavailable
 const GOOD_FALLBACK_FIELD = 12
+// Minimum number of results in a category before any adjective is awarded
+export const MIN_ENTRIES = 3
 
 export const CATEGORIES = [
   {
     key: 'presisjon',
     label: 'Presisjon',
-    patterns: ['dart', 'bue', 'pil', 'skyting', 'blink', 'pong', 'spiker'],
+    patterns: ['dart', 'bue', 'pil', 'skyting', 'blink', 'pong', 'blåser'],
     elite: 'Snikskytter',
     good:  'Presisjonsskytter',
   },
   {
     key: 'strategi',
     label: 'Strategi',
-    patterns: ['sjakk', 'chess', 'poker', 'majer', 'canasta', 'bridge', 'stein', 'saks', 'kortspill'],
+    // spikern before 'ball' in ballsport so Spikern routes here, not ballsport
+    patterns: ['sjakk', 'chess', 'poker', 'majer', 'canasta', 'bridge', 'stein', 'saks',
+               'kortspill', 'gnav', 'mario', 'fordeler', 'spikern', 'hot wheel'],
     elite: 'Stormester',
     good:  'Strateg',
   },
@@ -28,28 +32,31 @@ export const CATEGORIES = [
   {
     key: 'kasting',
     label: 'Kasting',
-    patterns: ['golf', 'disc', 'frisbee', 'bocce', 'petanq', 'støvel', 'papirfly', 'kast'],
+    patterns: ['golf', 'disc', 'frisbee', 'bocce', 'petanq', 'støvel', 'kast', 'kubb'],
     elite: 'Mesterkaster',
     good:  'Kastetalent',
   },
   {
     key: 'kunnskap',
     label: 'Kunnskap',
-    patterns: ['quiz', 'trivia', 'geografi', 'kunnskap', 'tippelapp', 'tippe', 'ord'],
+    patterns: ['quiz', 'trivia', 'geografi', 'kunnskap', 'tippelapp', 'tippe', 'ord',
+               'bezzer', 'geo', 'idealtid', 'mange'],
     elite: 'Allviter',
     good:  'Kunnskapsrik',
   },
   {
     key: 'koordinasjon',
     label: 'Koordinasjon',
-    patterns: ['bomull', 'balanse', 'akrobat', 'ballongl', 'balloon', 'wheels', 'hopp', 'hinderbane'],
+    // papirfly, sykle, ballong, halen all explicitly listed; 'wheels' removed (Hot Wheels → strategi)
+    patterns: ['bomull', 'balanse', 'akrobat', 'ballongl', 'balloon', 'hopp', 'hinderbane',
+               'papirfly', 'ballong', 'halen', 'wii', 'sykle'],
     elite: 'Akrobat',
     good:  'Koordinert',
   },
   {
     key: 'utholdenhet',
     label: 'Utholdenhet',
-    patterns: ['løp', 'sprint', 'sykkel', 'svøm', 'klatr', 'maraton', 'potet', 'vandring'],
+    patterns: ['løp', 'sprint', 'sykkel', 'svøm', 'klatr', 'maraton', 'potet', 'vandring', 'staffet'],
     elite: 'Jernmann',
     good:  'Utholdende',
   },
@@ -63,7 +70,7 @@ export const CATEGORIES = [
   {
     key: 'styrke',
     label: 'Styrke',
-    patterns: ['tautrekk', 'vektløft', 'arm', 'styrke', 'bryting', 'kamp'],
+    patterns: ['tautrekk', 'vektløft', 'arm', 'styrke', 'bryting', 'kamp', 'kule'],
     elite: 'Kraftkar',
     good:  'Sterk',
   },
@@ -71,7 +78,7 @@ export const CATEGORIES = [
 
 export const DUEL_CAT = { key: 'duell', label: 'Duell', elite: 'Gladiator', good: 'Duellant' }
 
-// Catch-all for events that don't match any named category
+// Catch-all for exercises that don't match any named category
 export const ALLROUND_CAT = { key: 'allround', label: 'Allround', elite: 'Mester', good: 'Allrounder' }
 
 export const ALL_CATEGORIES = [...CATEGORIES, DUEL_CAT, ALLROUND_CAT]
@@ -80,7 +87,7 @@ export function getCategoryByKey(key) {
   return ALL_CATEGORIES.find(c => c.key === key) ?? null
 }
 
-// Returns a category for any event name; never returns null (falls back to ALLROUND_CAT)
+// Returns the category for an event name; never returns null (falls back to ALLROUND_CAT)
 export function getCategory(eventName) {
   const lower = eventName.toLowerCase()
   for (const cat of CATEGORIES) {
@@ -90,8 +97,10 @@ export function getCategory(eventName) {
 }
 
 // results:       array of { event: { id, name, is_duel, is_hansa }, placement }
-// countByEvent:  optional { [eventId]: number } — participant count per event for relative threshold
-// Returns: { adjective, isElite, categoryKey, sortKey }[] (up to 3, best first)
+// countByEvent:  optional { [eventId]: number } — participant count per event
+// Returns up to 3 adjectives, best category first.
+// An adjective requires MIN_ENTRIES results in the category to be statistically valid.
+// The "good" threshold is relative: avg placement ≤ median of the field.
 export function computeKeywords(results, countByEvent = {}) {
   const stats = {}
 
@@ -106,6 +115,8 @@ export function computeKeywords(results, countByEvent = {}) {
   const keywords = []
 
   for (const { cat, entries } of Object.values(stats)) {
+    if (cat.key !== 'duell' && entries.length < MIN_ENTRIES) continue
+
     const placements = entries.map(e => e.placement)
     const avg = placements.reduce((s, p) => s + p, 0) / placements.length
     let adjective = null
@@ -118,8 +129,6 @@ export function computeKeywords(results, countByEvent = {}) {
       else if (winRate >= 0.4) { adjective = cat.good }
       sortKey = 1 - winRate
     } else {
-      // "Good" threshold = above the median for this category's field sizes.
-      // Uses actual participant counts when available, falls back to GOOD_FALLBACK_FIELD.
       const fieldSizes = entries.map(e => countByEvent[e.eventId] ?? GOOD_FALLBACK_FIELD)
       const avgField = fieldSizes.reduce((s, n) => s + n, 0) / fieldSizes.length
       const goodThreshold = avgField / 2
