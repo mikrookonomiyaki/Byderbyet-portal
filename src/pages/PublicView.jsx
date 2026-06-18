@@ -136,16 +136,21 @@ function EmptyTournament({ year }) {
 }
 
 function TournamentView({ data }) {
-  const { events, standings, scoringDirection, isCompleted } = data
+  const { events, duelEvents, standings, scoringDirection, isCompleted } = data
   const scoreLabel = scoringDirection === 'desc' ? 'Poeng' : 'Doeng'
+
+  const allEvents = [
+    ...events,
+    ...(duelEvents ?? []).map(e => ({ ...e, displayName: `${e.name} (Duell)` })),
+  ]
 
   return (
     <div>
       <RankingTable standings={standings} scoreLabel={scoreLabel} isCompleted={isCompleted} />
-      {events.length > 0 && (
+      {allEvents.length > 0 && (
         <div className={styles.detailSection}>
           <p className={styles.detailLabel}>Øvelsesresultater</p>
-          <DetailTable standings={standings} events={events} scoreLabel={scoreLabel} />
+          <DetailTable standings={standings} events={allEvents} scoreLabel={scoreLabel} />
         </div>
       )}
     </div>
@@ -205,9 +210,9 @@ function DetailTable({ standings, events, scoreLabel }) {
                 <Link
                   to={`/event/${encodeURIComponent(e.name)}`}
                   className={styles.eventLink}
-                  title={e.name}
+                  title={e.displayName ?? e.name}
                 >
-                  {e.is_hansa ? 'Hansa' : e.name.substring(0, 8)}
+                  {e.is_hansa ? 'Hansa' : e.is_duel ? e.name.substring(0, 5) + ' (D)' : e.name.substring(0, 8)}
                 </Link>
               </th>
             ))}
