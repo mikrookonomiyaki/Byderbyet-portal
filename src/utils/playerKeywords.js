@@ -1,12 +1,14 @@
-// Raised to 4.0 so ~50% more players reach elite level vs the original 2.5
-export const ELITE = 4.0
 // Fallback field size when participant counts are unavailable
-const GOOD_FALLBACK_FIELD = 12
+export const GOOD_FALLBACK_FIELD = 12
 // Minimum number of results in a category before any adjective is awarded
 export const MIN_ENTRIES = 2
 // Bayesian regularization strength: blends observed avg with prior based on sample size.
 // Higher k = more shrinkage for small samples (k=3 means 3 exercises → 50/50 prior/observed).
 export const REGULARIZATION = 3
+// Exactly this many qualified players receive the elite badge (when enough players exist)
+export const ELITE_COUNT = 2
+// Fraction of qualified players who receive the good badge (after the elite slots)
+export const GOOD_FRAC = 0.35
 
 export const CATEGORIES = [
   {
@@ -100,58 +102,91 @@ export function getCategory(eventName) {
   return ALLROUND_CAT
 }
 
-// results:       array of { event: { id, name, is_duel, is_hansa }, placement }
-// countByEvent:  optional { [eventId]: number } — participant count per event
-// Returns up to 3 adjectives, best category first.
-// An adjective requires MIN_ENTRIES results in the category to be statistically valid.
-// The "good" threshold is relative: avg placement ≤ median of the field.
-export function computeKeywords(results, countByEvent = {}) {
-  const stats = {}
+// Compute Bayesian-regularized average placement for a set of entries
+function computeRegAvg(entries, countByEvent) {
+  const n = entries.length
+  const placements = entries.map(e => e.placement)
+  const avg = placements.reduce((s, p) => s + p, 0) / n
+  const fieldSizes = entries.map(e => countByEvent[e.eventId] ?? GOOD_FALLBACK_FIELD)
+  const avgField = fieldSizes.reduce((s, f) => s + f, 0) / fieldSizes.length
+  const priorMean = (avgField + 1) / 2
+  return (n * avg + REGULARIZATION * priorMean) / (n + REGULARIZATION)
+}
 
-  for (const r of results) {
-    if (r.event.is_hansa) continue
-    const cat = r.event.is_duel ? DUEL_CAT : getCategory(r.event.name)
+// Assign elite/good badge based on rank among qualified players.
+// Always exactly ELITE_COUNT elite badges (fewer only if not enough players).
+function assignBadge(rank, total, cat) {
+  const eliteCount = Math.min(total, ELITE_COUNT)
+  const goodCount  = Math.min(total - eliteCount, Math.round(total * GOOD_FRAC))
+  if (rank <= eliteCount) return { adjective: cat.elite, isElite: true }
+  if (rank <= eliteCount + goodCount) return { adjective: cat.good, isElite: false }
+  return { adjective: null, isElite: false }
+}
+
+// Rank-based keyword computation using raw DB results and lookup maps.
+//
+// targetName:      string — player's name as stored in DB
+// allResults:      raw array of { event_id, participant_id, placement } from Supabase
+// eventById:       { [id]: event object with name, is_duel, is_hansa }
+// participantById: { [id]: { name, ... } }
+// countByEvent:    { [event_id]: number } participant counts
+export function computeKeywordsFromAllResults(targetName, allResults, eventById, participantById, countByEvent = {}) {
+  const targetLower = targetName.toLowerCase()
+
+  // Group entries by (catKey, playerName)
+  const catStats = {} // { catKey: { [nameLower]: { name, entries[] } } }
+  for (const r of allResults) {
+    const event = eventById[r.event_id]
+    if (!event || event.is_hansa) continue
+    const participant = participantById[r.participant_id]
+    if (!participant) continue
+    const cat = event.is_duel ? DUEL_CAT : getCategory(event.name)
     const k = cat.key
-    if (!stats[k]) stats[k] = { cat, entries: [] }
-    stats[k].entries.push({ placement: r.placement, eventId: r.event.id })
+    const nl = participant.name.toLowerCase()
+    if (!catStats[k]) catStats[k] = {}
+    if (!catStats[k][nl]) catStats[k][nl] = { name: participant.name, entries: [] }
+    catStats[k][nl].entries.push({ placement: r.placement, eventId: r.event_id })
   }
 
   const keywords = []
 
-  for (const { cat, entries } of Object.values(stats)) {
-    if (cat.key !== 'duell' && entries.length < MIN_ENTRIES) continue
+  for (const [catKey, byNameLower] of Object.entries(catStats)) {
+    const targetData = byNameLower[targetLower]
+    if (!targetData) continue
+    const cat = getCategoryByKey(catKey)
+    if (!cat) continue
 
-    const placements = entries.map(e => e.placement)
-    const avg = placements.reduce((s, p) => s + p, 0) / placements.length
-    let adjective = null
-    let isElite = false
-    let sortKey
-
-    if (cat.key === 'duell') {
-      const winRate = placements.filter(p => p === 1).length / placements.length
+    if (catKey === 'duell') {
+      const entries = targetData.entries
+      if (entries.length < MIN_ENTRIES) continue
+      const winRate = entries.filter(e => e.placement === 1).length / entries.length
+      let adjective = null, isElite = false
       if (winRate >= 0.6) { adjective = cat.elite; isElite = true }
       else if (winRate >= 0.4) { adjective = cat.good }
-      sortKey = 1 - winRate
-    } else {
-      const n = entries.length
-      const fieldSizes = entries.map(e => countByEvent[e.eventId] ?? GOOD_FALLBACK_FIELD)
-      const avgField = fieldSizes.reduce((s, f) => s + f, 0) / fieldSizes.length
-      // Prior: expected placement with no skill = midpoint of the field
-      const priorMean = (avgField + 1) / 2
-      const goodThreshold = avgField / 2
-      // Regularized average: shrinks toward prior for small samples, converges to raw avg as n grows.
-      // This corrects the bias where fewer exercises gives a better-looking average.
-      const regAvg = (n * avg + REGULARIZATION * priorMean) / (n + REGULARIZATION)
-
-      if (regAvg <= ELITE) { adjective = cat.elite; isElite = true }
-      else if (regAvg <= goodThreshold) { adjective = cat.good }
-      sortKey = regAvg
+      if (adjective) keywords.push({ adjective, isElite, categoryKey: catKey, sortKey: 1 - winRate })
+      continue
     }
 
-    if (adjective) keywords.push({ adjective, isElite, categoryKey: cat.key, sortKey })
+    // Only rank qualified players
+    const qualified = Object.values(byNameLower)
+      .filter(p => p.entries.length >= MIN_ENTRIES)
+      .map(p => ({ name: p.name, regAvg: computeRegAvg(p.entries, countByEvent) }))
+      .sort((a, b) => a.regAvg - b.regAvg)
+
+    if (qualified.length === 0) continue
+
+    const targetEntry = qualified.find(p => p.name.toLowerCase() === targetLower)
+    if (!targetEntry) continue // target didn't meet MIN_ENTRIES
+
+    // Rank: how many qualified players have strictly lower regAvg
+    const rank = qualified.filter(p => p.regAvg < targetEntry.regAvg).length + 1
+    const { adjective, isElite } = assignBadge(rank, qualified.length, cat)
+    if (adjective) keywords.push({ adjective, isElite, categoryKey: catKey, sortKey: targetEntry.regAvg })
   }
 
-  return keywords
-    .sort((a, b) => a.sortKey - b.sortKey)
-    .slice(0, 3)
+  // Elite badges always rank above good badges; within each tier, lower sortKey wins.
+  return keywords.sort((a, b) => {
+    if (a.isElite !== b.isElite) return a.isElite ? -1 : 1
+    return a.sortKey - b.sortKey
+  }).slice(0, 3)
 }
