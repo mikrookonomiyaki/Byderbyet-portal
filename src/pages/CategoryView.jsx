@@ -82,10 +82,6 @@ export default function CategoryView() {
           isElite = winRate >= 0.6
           adjective = winRate >= 0.6 ? category.elite : winRate >= 0.4 ? category.good : null
           sortKey = 1 - winRate
-        } else if (!meetsMinimum) {
-          adjective = null
-          isElite = false
-          sortKey = avg
         } else {
           const n = entries.length
           const fieldSizes = entries.map(e => countByEvent[e.eventId] ?? 12)
@@ -93,9 +89,12 @@ export default function CategoryView() {
           const priorMean = (avgField + 1) / 2
           const goodThreshold = avgField / 2
           const regAvg = (n * avg + REGULARIZATION * priorMean) / (n + REGULARIZATION)
-          isElite = regAvg <= ELITE
-          adjective = regAvg <= ELITE ? category.elite : regAvg <= goodThreshold ? category.good : null
+          // Always use regAvg for sorting so 1-exercise players don't float above badge holders
           sortKey = regAvg
+          if (meetsMinimum) {
+            isElite = regAvg <= ELITE
+            adjective = regAvg <= ELITE ? category.elite : regAvg <= goodThreshold ? category.good : null
+          }
         }
 
         return {

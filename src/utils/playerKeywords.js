@@ -1,9 +1,9 @@
-// Raised from 2.5 to 3.5 to account for regularization shrinkage and increase elite count ~50%
-export const ELITE = 3.5
+// Raised to 4.0 so ~50% more players reach elite level vs the original 2.5
+export const ELITE = 4.0
 // Fallback field size when participant counts are unavailable
 const GOOD_FALLBACK_FIELD = 12
 // Minimum number of results in a category before any adjective is awarded
-export const MIN_ENTRIES = 3
+export const MIN_ENTRIES = 2
 // Bayesian regularization strength: blends observed avg with prior based on sample size.
 // Higher k = more shrinkage for small samples (k=3 means 3 exercises → 50/50 prior/observed).
 export const REGULARIZATION = 3
