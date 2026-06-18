@@ -170,9 +170,8 @@ function TournamentEditor({ tournamentId }) {
     const order = { Fredag: 0, Lørdag: 1, Søndag: 2 }
     return (order[a] ?? 99) - (order[b] ?? 99)
   })
+  // Also show events with no day assigned
   const hasNullDay = events.some(e => !e.day)
-  const hasResults = standings.some(p => Object.keys(p.eventResults).length > 0)
-  const tournamentStatus = isCompleted ? 'completed' : hasResults ? 'ongoing' : 'notStarted'
 
   return (
     <div>
@@ -181,18 +180,17 @@ function TournamentEditor({ tournamentId }) {
         <AddEventForm tournamentId={tournamentId} onAdded={refresh} />
       </div>
 
-      {/* Tournament status */}
+      {/* Tournament completion */}
       <div className={styles.completionBar}>
-        <span className={tournamentStatus === 'ongoing' ? styles.statusYellow : styles.statusRed}>
-          {tournamentStatus === 'completed' ? 'Turnering avsluttet' : tournamentStatus === 'ongoing' ? 'Turnering pågår' : 'Turnering ikke påbegynt'}
-        </span>
-        {tournamentStatus === 'ongoing' && (
+        {isCompleted ? (
+          <div className={styles.completedState}>
+            <span className={styles.completedBadge}>Turnering avsluttet</span>
+            <button className={styles.reopenBtn} onClick={reopenTournament}>Gjenåpne</button>
+          </div>
+        ) : (
           <button className={styles.completeBtn} onClick={completeTournament} disabled={completing}>
             {completing ? 'Avslutter...' : 'Avslutt turnering'}
           </button>
-        )}
-        {tournamentStatus === 'completed' && (
-          <button className={styles.reopenBtn} onClick={reopenTournament}>Gjenåpne</button>
         )}
         <span className={styles.completionHint}>
           {isCompleted ? 'Pokaler og medaljer er synlige.' : 'Pokaler og medaljer skjules til turneringen avsluttes.'}
