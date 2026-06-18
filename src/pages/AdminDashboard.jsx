@@ -247,7 +247,7 @@ function TournamentEditor({ tournamentId }) {
                         onClick={() => togglePublish(e)}
                         title={e.is_published === false ? 'Klikk for å publisere' : 'Klikk for å sette som utkast'}
                       >
-                        {e.is_published === false ? 'Utkast' : 'Live'}
+                        {e.is_published === false ? 'Utkast' : 'Publisert'}
                       </span>
                     </div>
                   </th>
@@ -426,7 +426,7 @@ function DuelCard({ duel, standings, onRefresh }) {
           onClick={togglePublish}
           title={duel.is_published === false ? 'Klikk for å publisere' : 'Klikk for å sette som utkast'}
         >
-          {duel.is_published === false ? 'Utkast' : 'Live'}
+          {duel.is_published === false ? 'Utkast' : 'Publisert'}
         </span>
       </div>
 

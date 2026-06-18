@@ -56,7 +56,7 @@ export default function PublicView() {
               if (active) setSelectedId(active.id)
             }}
           >
-            <img src="/byderbyet_emblem.png" alt="Byderbyet emblem" className={styles.emblem} />
+            <img src="/byderbyet_emblem.png" alt="Byderbyet-emblem" className={styles.emblem} />
             <h1 className={styles.title}>Byderbyet</h1>
           </div>
           <HallOfFame />
