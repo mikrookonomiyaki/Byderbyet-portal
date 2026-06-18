@@ -414,6 +414,17 @@ function DuelCard({ duel, standings, onRefresh }) {
     onRefresh()
   }
 
+  async function wipeOut() {
+    await supabase.from('results').delete().eq('event_id', duel.id)
+    await supabase.from('events').update({ is_published: false }).eq('id', duel.id)
+    setP1Id('')
+    setP2Id('')
+    setWinnerId('')
+    setDay('')
+    setEditing(false)
+    onRefresh()
+  }
+
   const winner = existing[0]
   const loser = existing[1]
 
@@ -436,7 +447,10 @@ function DuelCard({ duel, standings, onRefresh }) {
           <span className={styles.duelVs}>vs</span>
           <span className={styles.duelLoser}>{loser.name}</span>
           <div className={styles.duelResultLabel}>Vinner: {winner.name}</div>
-          <button className={styles.duelEditBtn} onClick={() => setEditing(true)}>Rediger</button>
+          <div className={styles.duelResultBtns}>
+            <button className={styles.duelEditBtn} onClick={() => setEditing(true)}>Rediger</button>
+            <button className={styles.duelWipeBtn} onClick={wipeOut}>Visk ut</button>
+          </div>
         </div>
       ) : (
         <div className={styles.duelForm}>

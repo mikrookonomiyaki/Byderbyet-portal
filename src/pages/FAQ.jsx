@@ -1,26 +1,39 @@
 import { Link } from 'react-router-dom'
 import styles from './FAQ.module.css'
 
+const doengTable = (
+  <div>
+    <p className={styles.answer}>
+      Doeng-skalaen er enkel, men smertefull for den som havner bak:
+    </p>
+    <table className={styles.scaleTable}>
+      <thead>
+        <tr>
+          <th>Plassering</th>
+          <th>Doeng</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1. plass</td><td>−2</td></tr>
+        <tr><td>2. plass</td><td>0</td></tr>
+        <tr><td>3. plass</td><td>2</td></tr>
+        <tr><td>4. plass og ned</td><td>= plasseringen (4, 5, 6 …)</td></tr>
+      </tbody>
+    </table>
+    <p className={styles.answer} style={{ marginTop: '0.75rem' }}>
+      Vinneren belønnes altså med negative poeng — jo lenger bak, desto verre. Toppen er gull verdt; bunnen er smertefullt. I eldre utgaver av Byderbyet (2019–2021) var systemet snudd: høyest poengsum vant.
+    </p>
+  </div>
+)
+
 const QAS = [
   {
     q: 'Hva er Byderbyet?',
     a: 'Byderbyet er en uformell idrettskonkurranse mellom venner og bekjente. Over én helg møtes deltakerne til kamp i en rekke øvelser — fra darts og volleyball til quiz og petanque. Det handler like mye om god stemning og dårlig tapersinn som om seier.',
   },
   {
-    q: 'Hva betyr "Doeng"?',
-    a: 'Doeng er poengsystemet i Byderbyet. Lavest mulig doeng er målet — akkurat som i golf. Plasstilordningen fra hver øvelse oversettes til doeng via en fast skala, og totalsummen avgjør den endelige rangeringen. Den med lavest sum vinner.',
-  },
-  {
-    q: 'Hvordan beregnes doeng per øvelse?',
-    a: '1. plass gir 1 doeng, 2. plass gir 3, 3. plass gir 5, 4. plass gir 7 — og fortsetter oppover. De bakerste plassene gir stadig mer doeng, slik at det lønner seg å kjempe om toppen. I eldre utgaver av Byderbyet (2019–2021) var systemet snudd: høyest poengsum vant.',
-  },
-  {
-    q: 'Hva er en Duell?',
-    a: 'En duell er en en-mot-en-konkurranse mellom to utvalgte deltakere. Vinneren belønnes med −5 doeng, mens taperen straffes med +5 doeng. Dueller kan foregå i alt fra Beyblade til Jenga — det er arrangøren som bestemmer øvelsen, og de foregår typisk spredt utover helgen.',
-  },
-  {
-    q: 'Hva er Hansa-sanksjonen?',
-    a: 'Hansa (sanksjon) er en spesiell straffemekanisme. Deltakere som bryter uskrevne regler, oppfører seg upassende, eller på annet vis fortjener straff, kan tildeles sanksjonspoeng direkte av arrangøren. Disse legges rett til i doengtotalen — ingen skala, ingen nåde. Spillere som har mottatt sanksjonen, bærer merket "Hansa-dranker" på profilen sin.',
+    q: 'Kan jeg se resultater fra tidligere år?',
+    a: 'Ja. Bruk fanevalget øverst på forsiden for å bla mellom aktiv turnering og historiske resultater. Klikk på et deltakernavn for å åpne profilen, som viser statistikk, pokaler og adjektiver på tvers av alle år vedkommende har deltatt.',
   },
   {
     q: 'Hvorfor har jeg fått de adjektivene jeg har fått?',
@@ -29,6 +42,22 @@ const QAS = [
   {
     q: 'Hva betyr mastergrad-hatten på adjektivet?',
     a: 'Mastergrad-hatten dukker opp på adjektiver der du har oppnådd elitenivå — altså at du konsekvent ender blant de to-tre beste i den aktuelle kategorien. Det er den høyeste utmerkelsen i et ferdighetsområde. Klikk på adjektivet for å se alle deltakere rangert i samme kategori.',
+  },
+  {
+    q: 'Hva betyr "Doeng"?',
+    a: 'Doeng er poengsystemet i Byderbyet. Lavest mulig doeng er målet — akkurat som i golf. Plasseringen fra hver øvelse oversettes til doeng via en fast skala, og totalsummen avgjør den endelige rangeringen. Den med lavest sum vinner.',
+  },
+  {
+    q: 'Hvordan beregnes doeng per øvelse?',
+    a: doengTable,
+  },
+  {
+    q: 'Hva er en Duell?',
+    a: 'En duell er en en-mot-en-konkurranse mellom to utvalgte deltakere. Vinneren belønnes med −2 doeng, mens taperen straffes med +2 doeng. Dueller kan foregå i alt fra Beyblade til Jenga — det er arrangøren som bestemmer øvelsen, og de foregår typisk spredt utover helgen.',
+  },
+  {
+    q: 'Hva er Hansa-sanksjonen?',
+    a: 'Hansa-sanksjonen er Byderbyet sin offisielle reaksjon på ett av de groveste bruddene i konkurransen: å dukke opp med en drikkevare produsert av Hansa Bryggeri. Det er ikke bare et dårlig valg — det er en erklæring om at du ikke respekterer verken deg selv, Byderbyet eller de rundt deg. Straffen er umiddelbar og nådeløs: et vilkårlig antall doeng legges rett til i totalen din, ingen skala, ingen anke, ingen juridisk bistand. Arrangøren er dommer, jury og bøddel. Deltakere som har mottatt sanksjonen, bærer merket "Hansa-dranker" på profilen sin — for alltid. La det være en advarsel: det finnes gode øl i verden. Hansa er ikke blant dem.',
   },
   {
     q: 'Hva er Æresgalleriet?',
@@ -46,10 +75,6 @@ const QAS = [
     q: 'Hva skjer ved poenglikhet?',
     a: 'Det er ikke noe automatisk tiebreak-system. Ved lik doeng-total avgjøres rekkefølgen etter avtale med arrangøren — gjerne på bakgrunn av antall etappeseiere eller en plutselig-død-ekstraøvelse.',
   },
-  {
-    q: 'Kan jeg se resultater fra tidligere år?',
-    a: 'Ja. Bruk fanevalget øverst på forsiden for å bla mellom aktiv turnering og historiske resultater. Klikk på et deltakernavn for å åpne profilen, som viser statistikk, pokaler og adjektiver på tvers av alle år vedkommende har deltatt.',
-  },
 ]
 
 export default function FAQ() {
@@ -65,7 +90,7 @@ export default function FAQ() {
           {QAS.map(({ q, a }) => (
             <li key={q} className={styles.item}>
               <p className={styles.question}>{q}</p>
-              <p className={styles.answer}>{a}</p>
+              {typeof a === 'string' ? <p className={styles.answer}>{a}</p> : a}
             </li>
           ))}
         </ol>

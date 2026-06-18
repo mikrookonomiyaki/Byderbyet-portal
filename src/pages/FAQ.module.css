@@ -73,6 +73,27 @@
   margin: 0;
 }
 
+.scaleTable {
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.scaleTable th,
+.scaleTable td {
+  padding: 0.35rem 1rem 0.35rem 0;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.scaleTable th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #888;
+  font-weight: 600;
+}
+
 .footer {
   padding: 1.5rem;
   font-size: 0.85rem;
