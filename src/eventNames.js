@@ -3,6 +3,8 @@ export const CANONICAL_NAME = {
   'bomullsdott': 'Bomullsdotten',
   'dart': 'Darts',
   'kubjakt': 'Kubbjakt',
+  'disc golf': 'Frisbee Golf',
+  'discgolf': 'Frisbee Golf',
   'stein, saks og papir': 'Stein, saks, papir',
   'mayer': 'Majer',
   'hansa': 'Hansa (sanksjon)',
