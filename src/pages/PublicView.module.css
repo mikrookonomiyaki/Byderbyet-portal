@@ -386,6 +386,62 @@
   text-decoration: underline;
 }
 
+.schedule {
+  max-width: 680px;
+}
+
+.scheduleLabel {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #999;
+  margin: 0 0 1rem;
+  font-weight: 600;
+}
+
+.scheduleDays {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.scheduleDay {
+  min-width: 160px;
+}
+
+.scheduleDayTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #555;
+  margin: 0 0 0.6rem;
+  border-bottom: 2px solid #e0e0dc;
+  padding-bottom: 0.35rem;
+}
+
+.scheduleList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.scheduleItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+  color: #222;
+}
+
+.scheduleIcon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
 @media (max-width: 600px) {
   .banner {
     font-size: 0.8rem;

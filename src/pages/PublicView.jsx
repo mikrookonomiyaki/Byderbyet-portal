@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient'
 import { useTournamentData } from '../hooks/useTournamentData'
 import { useHallOfFame } from '../hooks/useHallOfFame'
 import TrophyIcon from '../components/TrophyIcon'
+import { getEventIcon } from '../utils/eventIcons'
 import styles from './PublicView.module.css'
 
 function HallOfFame() {
@@ -98,7 +99,11 @@ export default function PublicView() {
         {loading && <p className={styles.status}>Laster...</p>}
         {error && <p className={styles.error}>Feil: {error}</p>}
         {data && data.events.length === 0 && <EmptyTournament year={tournaments.find(t => t.id === selectedId)?.year} />}
-        {data && data.events.length > 0 && <TournamentView data={data} />}
+        {data && data.events.length > 0 && (
+          data.standings.some(p => Object.keys(p.eventResults).length > 0)
+            ? <TournamentView data={data} />
+            : <ScheduleSection events={data.events} />
+        )}
       </main>
 
       <footer className={styles.footer}>
@@ -137,6 +142,38 @@ function EmptyTournament({ year }) {
 }
 
 const DAY_ORDER_PV = { Fredag: 0, Lørdag: 1, Søndag: 2 }
+
+function ScheduleSection({ events }) {
+  const grouped = {}
+  events.forEach(e => {
+    const day = e.day || 'Dag ikke satt'
+    if (!grouped[day]) grouped[day] = []
+    grouped[day].push(e)
+  })
+  const days = Object.keys(grouped).sort((a, b) =>
+    (DAY_ORDER_PV[a] ?? 99) - (DAY_ORDER_PV[b] ?? 99)
+  )
+  return (
+    <div className={styles.schedule}>
+      <p className={styles.scheduleLabel}>Program</p>
+      <div className={styles.scheduleDays}>
+        {days.map(day => (
+          <div key={day} className={styles.scheduleDay}>
+            <p className={styles.scheduleDayTitle}>{day}</p>
+            <ul className={styles.scheduleList}>
+              {grouped[day].map(e => (
+                <li key={e.id} className={styles.scheduleItem}>
+                  <span className={styles.scheduleIcon}>{getEventIcon(e.name)}</span>
+                  {e.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 function TournamentView({ data }) {
   const { events, duelEvents, standings, scoringDirection, isCompleted } = data
