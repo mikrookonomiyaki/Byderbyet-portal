@@ -23,8 +23,8 @@ export const CATEGORIES = [
     label: 'Strategi',
     // spikern before 'ball' in ballsport so Spikern routes here, not ballsport
     patterns: ['sjakk', 'chess', 'poker', 'majer', 'canasta', 'bridge', 'stein', 'saks',
-               'kortspill', 'gnav', 'mario', 'fordeler', 'spikern', 'hot wheel'],
-    elite: 'Stormester',
+               'kortspill', 'gnav', 'mario', 'fordeler', 'spikern', 'raffle'],
+    elite: 'Mesterstrateg',
     good:  'Strateg',
   },
   {
@@ -53,7 +53,6 @@ export const CATEGORIES = [
   {
     key: 'koordinasjon',
     label: 'Koordinasjon',
-    // papirfly, sykle, ballong, halen all explicitly listed; 'wheels' removed (Hot Wheels → strategi)
     patterns: ['bomull', 'balanse', 'akrobat', 'ballongl', 'balloon', 'hopp', 'hinderbane',
                'papirfly', 'ballong', 'halen', 'wii', 'sykle'],
     elite: 'Akrobat',
@@ -69,7 +68,7 @@ export const CATEGORIES = [
   {
     key: 'kreativitet',
     label: 'Kreativitet',
-    patterns: ['dans', 'musikk', 'sang', 'tegn', 'mal', 'beats', 'sing'],
+    patterns: ['dans', 'musikk', 'sang', 'tegn', 'mal', 'beats', 'sing', 'hot wheel'],
     elite: 'Scenekunstner',
     good:  'Kreativ',
   },
@@ -84,10 +83,10 @@ export const CATEGORIES = [
 
 export const DUEL_CAT = { key: 'duell', label: 'Duell', elite: 'Gladiator', good: 'Duellant' }
 
-// Catch-all for exercises that don't match any named category
-export const ALLROUND_CAT = { key: 'allround', label: 'Allround', elite: 'Mester', good: 'Allrounder' }
+// Internal catch-all — not exposed as a navigable category
+const ALLROUND_CAT = { key: 'allround', label: 'Allround', elite: 'Mester', good: 'Allrounder' }
 
-export const ALL_CATEGORIES = [...CATEGORIES, DUEL_CAT, ALLROUND_CAT]
+export const ALL_CATEGORIES = [...CATEGORIES, DUEL_CAT]
 
 export function getCategoryByKey(key) {
   return ALL_CATEGORIES.find(c => c.key === key) ?? null
