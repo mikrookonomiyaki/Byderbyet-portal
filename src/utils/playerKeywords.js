@@ -38,7 +38,7 @@ export const CATEGORIES = [
   {
     key: 'kasting',
     label: 'Kasting',
-    patterns: ['golf', 'disc', 'frisbee', 'bocce', 'petanq', 'støvel', 'kast', 'kubb'],
+    patterns: ['golf', 'disc', 'frisbee', 'bocce', 'petanq', 'støvel', 'kast', 'kubb', 'kubjakt'],
     elite: 'Mesterkaster',
     good:  'Kastetalent',
   },
@@ -62,7 +62,7 @@ export const CATEGORIES = [
   {
     key: 'utholdenhet',
     label: 'Utholdenhet',
-    patterns: ['løp', 'sprint', 'sykkel', 'svøm', 'klatr', 'maraton', 'potet', 'vandring', 'staffet'],
+    patterns: ['løp', 'sprint', 'sykkel', 'svøm', 'klatr', 'maraton', 'potet', 'vandring', 'stafet'],
     elite: 'Jernmann',
     good:  'Utholdende',
   },

@@ -37,11 +37,11 @@ const QAS = [
   },
   {
     q: 'Hvorfor har jeg fått de adjektivene jeg har fått?',
-    a: 'Adjektivene beregnes automatisk fra resultatene dine. Øvelsene er gruppert i ti ferdighetskategorier: Presisjon, Strategi, Ballsport, Kasting, Kunnskap, Koordinasjon, Utholdenhet, Kreativitet, Styrke og Duell. For hver kategori du har deltatt i, beregnes gjennomsnittsplasseringen din. Er den ≤ 2,5 er du på elitenivå, er den ≤ 5,5 er du på godt nivå. De tre kategoriene du gjør det best i, vises på profilen.',
+    a: 'Adjektivene beregnes automatisk fra resultatene dine. Øvelsene er gruppert i ti ferdighetskategorier: Presisjon, Strategi, Ballsport, Kasting, Kunnskap, Koordinasjon, Utholdenhet, Kreativitet, Styrke og Duell. Du må ha deltatt i minst 2 øvelser i en kategori for å kvalifisere. Innenfor hver kategori rangeres alle kvalifiserte deltakere etter bayesiansk justert gjennomsnittsplassering. De to beste i kategorien får elitenivå; de neste 35 % får godt nivå. De tre kategoriene du gjør det best i, vises på profilen — elitenivå alltid øverst.',
   },
   {
     q: 'Hva betyr mastergrad-hatten på adjektivet?',
-    a: 'Mastergrad-hatten dukker opp på adjektiver der du har oppnådd elitenivå — altså at du konsekvent ender blant de to-tre beste i den aktuelle kategorien. Det er den høyeste utmerkelsen i et ferdighetsområde. Klikk på adjektivet for å se alle deltakere rangert i samme kategori.',
+    a: 'Mastergrad-hatten dukker opp på adjektiver der du har oppnådd elitenivå — altså at du er blant de to best rangerte i den aktuelle kategorien. Det er den høyeste utmerkelsen i et ferdighetsområde. Klikk på adjektivet for å se alle deltakere rangert i samme kategori.',
   },
   {
     q: 'Hva betyr "Doeng"?',
