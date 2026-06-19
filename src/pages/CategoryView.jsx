@@ -19,7 +19,7 @@ export default function CategoryView() {
 
     async function load() {
       const [eventsRes, participantsRes] = await Promise.all([
-        supabase.from('events').select('*').eq('is_published', true).limit(10000),
+        supabase.from('events').select('*').neq('is_published', false).limit(10000),
         supabase.from('participants').select('*').limit(10000),
       ])
       if (eventsRes.error || participantsRes.error) {

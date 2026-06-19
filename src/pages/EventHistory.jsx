@@ -17,7 +17,7 @@ export default function EventHistory() {
       // Load all tournaments, events, participants and results
       const [tourRes, eventsRes] = await Promise.all([
         supabase.from('tournaments').select('*').order('year', { ascending: false }),
-        supabase.from('events').select('*').eq('is_published', true).limit(10000),
+        supabase.from('events').select('*').neq('is_published', false).limit(10000),
       ])
       if (tourRes.error || eventsRes.error) {
         setError((tourRes.error ?? eventsRes.error).message)
