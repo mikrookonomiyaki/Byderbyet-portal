@@ -527,7 +527,7 @@
 
 .compareCol {
   width: 60px;
-  text-align: center;
+  text-align: right;
   white-space: nowrap;
   font-size: 0.75rem;
   color: #999;

@@ -192,7 +192,10 @@ export default function ParticipantProfile() {
     <div className={styles.page}>
       <header className={styles.header}>
         <Link to="/" className={styles.back}>← Tilbake</Link>
-        <h1 className={styles.title}>{participantName}</h1>
+        <h1 className={styles.title}>
+          {participantName}
+          {data && <span className={styles.yearsTag}>{data.years.length} år</span>}
+        </h1>
       </header>
       <main className={styles.main}>
         {loading && <p className={styles.status}>Laster...</p>}
@@ -263,18 +266,32 @@ function ProfileView({ data }) {
 
       {byderbyWins.length > 0 && (
         <div className={styles.trophySection}>
-          <h2 className={styles.trophyTitle}>
-            <TrophyIcon className={styles.trophyIcon} /> Byderby-pokaler
-          </h2>
-          <div className={styles.trophyList}>
-            {byderbyWins.map(y => (
-              <span key={y} className={styles.trophy}>{y}</span>
-            ))}
+          <div className={styles.trophyAndMedals}>
+            <div>
+              <h2 className={styles.trophyTitle}>
+                <TrophyIcon className={styles.trophyIcon} /> Byderby-pokaler
+              </h2>
+              <div className={styles.trophyList}>
+                {byderbyWins.map(y => (
+                  <span key={y} className={styles.trophy}>{y}</span>
+                ))}
+              </div>
+            </div>
+            {(solvAar.length > 0 || bronseAar.length > 0) && (
+              <div className={styles.medalBlock}>
+                <h2 className={styles.sectionTitle}>Medaljer</h2>
+                <div className={styles.medalList}>
+                  {[...solvAar.map(y => ({ year: y, type: 'solv' })), ...bronseAar.map(y => ({ year: y, type: 'bronse' }))]
+                    .sort((a, b) => b.year - a.year)
+                    .map(m => <MedalEmblem key={`${m.type}-${m.year}`} year={m.year} type={m.type} />)}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {(solvAar.length > 0 || bronseAar.length > 0) && (
+      {(solvAar.length > 0 || bronseAar.length > 0) && byderbyWins.length === 0 && (
         <div className={styles.medalSection}>
           <h2 className={styles.sectionTitle}>Medaljer</h2>
           <div className={styles.medalList}>
@@ -307,20 +324,6 @@ function ProfileView({ data }) {
         </div>
       )}
 
-      <div className={styles.stats}>
-        <div className={styles.stat}>
-          <span className={styles.statVal}>{avgPlacement ?? '—'}</span>
-          <span className={styles.statLabel}>Snitt plassering</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statVal}>{etappeseiere.length}</span>
-          <span className={styles.statLabel}>Etappeseiere</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statVal}>{years.length}</span>
-          <span className={styles.statLabel}>År deltatt</span>
-        </div>
-      </div>
 
       {years.map(year => {
         const results = (byYear[year] ?? []).slice().sort((a, b) => a.placement - b.placement)
