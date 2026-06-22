@@ -214,7 +214,7 @@ function RankingTable({ standings, scoreLabel, isCompleted }) {
           </tr>
         </thead>
         <tbody>
-          {standings.map((p, i) => (
+          {standings.length > 0 ? standings.map((p, i) => (
             <tr key={p.id} className={i === 0 ? styles.gold : i === 1 ? styles.silver : i === 2 ? styles.bronze : ''}>
               <td>{i + 1}</td>
               <td>
@@ -224,6 +224,12 @@ function RankingTable({ standings, scoreLabel, isCompleted }) {
                 {i === 0 && isCompleted && <TrophyIcon outline className={styles.trophyIcon} />}
               </td>
               <td>{p.total}</td>
+            </tr>
+          )) : [1, 2, 3].map(i => (
+            <tr key={i}>
+              <td>{i}</td>
+              <td className={styles.emptyCell}>?</td>
+              <td className={styles.emptyCell}>?</td>
             </tr>
           ))}
         </tbody>
@@ -271,7 +277,7 @@ function DetailTable({ standings, events, scoreLabel }) {
           </tr>
         </thead>
         <tbody>
-          {standings.map(p => (
+          {standings.length > 0 ? standings.map(p => (
             <tr key={p.id}>
               <td className={styles.sticky}>
                 <Link to={`/participant/${encodeURIComponent(p.name)}`} className={styles.nameLink}>
@@ -287,6 +293,12 @@ function DetailTable({ standings, events, scoreLabel }) {
                 )
               })}
               <td className={styles.total}>{p.total}</td>
+            </tr>
+          )) : [1, 2, 3].map(i => (
+            <tr key={i}>
+              <td className={`${styles.sticky} ${styles.emptyCell}`}>?</td>
+              {events.map(e => <td key={e.id} className={styles.cell}></td>)}
+              <td className={styles.total}></td>
             </tr>
           ))}
         </tbody>
