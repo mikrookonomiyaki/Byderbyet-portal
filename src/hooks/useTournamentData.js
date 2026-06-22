@@ -40,14 +40,14 @@ export function useTournamentData(tournamentId, refreshKey = 0, { publishedOnly 
         return (a.sort_order ?? 0) - (b.sort_order ?? 0)
       })
 
-      // All events visible to this view (respects publishedOnly)
+      // Events for display: always show all events regardless of publishedOnly
+      const events = allEvents.filter(e => !e.is_duel)
+      const duelEvents = allEvents.filter(e => e.is_duel)
+
+      // Events for scoring: only published events (so unpublished results stay hidden)
       const visibleEvents = publishedOnly
         ? allEvents.filter(e => e.is_published !== false)
         : allEvents
-
-      // Split into regular events (for display grid) and duel events (separate UI)
-      const events = visibleEvents.filter(e => !e.is_duel)
-      const duelEvents = visibleEvents.filter(e => e.is_duel)
 
       const participants = participantsRes.data
 
