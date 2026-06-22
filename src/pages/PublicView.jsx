@@ -450,15 +450,13 @@ function RankingTable({ standings, scoreLabel, isCompleted, highlightedId, compa
             const isCompared = compareIds.includes(p.id)
             const isWinner = i === 0 && isCompleted
             const canAdd = compareIds.length < 2 || isCompared
-            const tiedWithNeighbor =
-              (i > 0 && standings[i - 1].total === p.total) ||
-              (i < standings.length - 1 && standings[i + 1].total === p.total)
+            const allZero = standings.every(s => s.total === 0)
             return (
               <tr
                 key={p.id}
                 ref={el => { if (el) rowRefsRef.current[p.id] = el; else delete rowRefsRef.current[p.id] }}
                 className={[
-                  i === 0 ? styles.gold : i === 1 ? styles.silver : i === 2 ? styles.bronze : '',
+                  !allZero && (i === 0 ? styles.gold : i === 1 ? styles.silver : i === 2 ? styles.bronze : ''),
                   isHighlighted ? styles.highlighted : '',
                 ].filter(Boolean).join(' ')}
                 onClick={e => {
