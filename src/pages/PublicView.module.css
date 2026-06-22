@@ -92,7 +92,7 @@
 }
 
 .emblem {
-  height: 96px;
+  height: 115px;
   width: auto;
 }
 
@@ -248,6 +248,14 @@
   background: #fff;
 }
 
+/* Ranking table never needs horizontal scroll — no sticky columns, always fits */
+.rankingTableWrap {
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  background: #fff;
+  overflow: hidden;
+}
+
 .table {
   border-collapse: collapse;
   width: 100%;
@@ -301,7 +309,7 @@
   display: block;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  height: 150px;
+  height: 120px;
   overflow: hidden;
   font-size: 0.62rem;
   font-weight: 600;
@@ -442,6 +450,323 @@
   flex-shrink: 0;
 }
 
+/* --- Countdown --- */
+
+.countdown {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: #0f1e3c;
+  border-radius: 8px;
+  color: #fff;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.countdownLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.countdownUnits {
+  display: flex;
+  gap: 1rem;
+}
+
+.countdownUnit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 2.5rem;
+}
+
+.countdownValue {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.countdownUnitLabel {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  margin-top: 0.2rem;
+}
+
+/* --- Compare modal --- */
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.modalBox {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.28);
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Compare column and buttons --- */
+
+.compareCol {
+  width: 60px;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.compareBtnAdd {
+  background: none;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  color: #6b7280;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.45rem;
+  cursor: pointer;
+  transition: border-color 0.1s, color 0.1s;
+}
+
+.compareBtnAdd:hover {
+  border-color: #1e40af;
+  color: #1e40af;
+}
+
+.compareBtnSelected {
+  background: #1e40af;
+  border: 1px solid #1e40af;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.45rem;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.compareBtnSelected:hover {
+  background: #1e3a8a;
+  border-color: #1e3a8a;
+}
+
+/* --- Row highlight --- */
+
+.highlighted td {
+  background: #eff6ff !important;
+}
+
+.stickyHighlighted {
+  background: #eff6ff !important;
+}
+
+/* --- Sort indicators --- */
+
+.sortActive {
+  background: #e0e7ff !important;
+  cursor: pointer;
+}
+
+.sortTotalActive {
+  font-weight: 700;
+}
+
+.sortTotalReset {
+  font-weight: 700;
+  color: #1e40af;
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+
+.sortColumnCell {
+  background: #f5f3ff;
+}
+
+/* --- Event history panel --- */
+
+.historyPanel {
+  margin-top: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  max-width: 360px;
+}
+
+.historyPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.historyPanelTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #555;
+}
+
+.historyPanelClose {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.historyPanelClose:hover {
+  color: #333;
+  background: #f0f0ee;
+}
+
+.historyPanelMsg {
+  color: #999;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.historyPanelList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.historyPanelItem {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  font-size: 0.9rem;
+}
+
+.historyPanelYear {
+  color: #999;
+  font-size: 0.8rem;
+  min-width: 2.5rem;
+}
+
+.historyPanelName {
+  color: #1a1a1a;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.historyPanelName:hover {
+  text-decoration: underline;
+}
+
+/* --- Compare panel (rendered inside modal box) --- */
+
+.comparePanel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.comparePanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #0f1e3c;
+  color: #fff;
+  border-radius: 10px 10px 0 0;
+  flex-shrink: 0;
+}
+
+.comparePanelTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #e2e8f0;
+}
+
+.comparePanelClose {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0.2rem 0.35rem;
+  border-radius: 4px;
+  transition: color 0.1s, background 0.1s;
+}
+
+.comparePanelClose:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.1);
+}
+
+.comparePlayerHead {
+  text-align: center;
+  font-weight: 700;
+}
+
+.compareWin {
+  background: #dcfce7 !important;
+  font-weight: 700;
+  color: #166534;
+}
+
+.compareTotal td {
+  font-weight: 700;
+  border-top: 2px solid #eee;
+}
+
+/* --- Rank change flash animations --- */
+
+@keyframes flashUp {
+  0% { background-color: #bbf7d0; }
+  100% { background-color: transparent; }
+}
+
+@keyframes flashDown {
+  0% { background-color: #fecaca; }
+  100% { background-color: transparent; }
+}
+
+.rankFlashUp td {
+  animation: flashUp 1.2s ease-out forwards;
+}
+
+.rankFlashDown td {
+  animation: flashDown 1.2s ease-out forwards;
+}
+
+/* --- Tiebreaker wins count badge --- */
+
+.winsCount {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 500;
+  vertical-align: middle;
+}
+
 @media (max-width: 600px) {
   .banner {
     font-size: 0.8rem;
@@ -454,7 +779,7 @@
   }
 
   .emblem {
-    height: 62px;
+    height: 74px;
   }
 
   .title {

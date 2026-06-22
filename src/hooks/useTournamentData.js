@@ -81,13 +81,14 @@ export function useTournamentData(tournamentId, refreshKey = 0, { publishedOnly 
       const standings = participants.map(p => {
         const eventResults = resultMap[p.id] ?? {}
         const total = Object.values(eventResults).reduce((sum, r) => sum + (r.doeng ?? 0), 0)
-        return { ...p, eventResults, total }
+        const wins = Object.values(eventResults).filter(r => r.placement === 1).length
+        return { ...p, eventResults, total, wins }
       })
 
       if (scoringDirection === 'desc') {
-        standings.sort((a, b) => b.total - a.total)
+        standings.sort((a, b) => b.total - a.total || b.wins - a.wins)
       } else {
-        standings.sort((a, b) => a.total - b.total)
+        standings.sort((a, b) => a.total - b.total || b.wins - a.wins)
       }
 
       setData({ events, duelEvents, participants, standings, scale, scoringDirection, isCompleted })
