@@ -248,6 +248,14 @@
   background: #fff;
 }
 
+/* Ranking table never needs horizontal scroll — no sticky columns, always fits */
+.rankingTableWrap {
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  background: #fff;
+  overflow: hidden;
+}
+
 .table {
   border-collapse: collapse;
   width: 100%;

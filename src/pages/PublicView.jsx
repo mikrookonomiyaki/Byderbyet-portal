@@ -142,7 +142,7 @@ function EmptyTournament({ year }) {
 }
 
 const DAY_ORDER_PV = { Fredag: 0, Lørdag: 1, Søndag: 2 }
-const TOURNAMENT_START_MS = new Date('2026-07-03T10:00:00').getTime()
+const TOURNAMENT_START_MS = new Date('2026-07-05T18:00:00').getTime()
 
 // --- Countdown ---
 
@@ -409,7 +409,7 @@ function TournamentView({ data }) {
 
 function RankingTable({ standings, scoreLabel, isCompleted, highlightedId, compareIds, onHighlight, onCompare }) {
   return (
-    <div className={styles.tableWrap}>
+    <div className={styles.rankingTableWrap}>
       <table className={styles.table}>
         <thead>
           <tr>
