@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import confetti from 'canvas-confetti'
@@ -47,11 +47,13 @@ export default function PublicView() {
     })
   }, [])
 
+  const selectedTournament = tournaments.find(t => t.id === selectedId)
+
   return (
     <div className={styles.page}>
-      <div className={styles.banner}>
-        Årets Byderby går snart av den såkalte stabelen! Møt opp 03.07–05.07 med spissede skotupper!
-      </div>
+      {selectedTournament?.banner_text && (
+        <div className={styles.banner}>{selectedTournament.banner_text}</div>
+      )}
       <header className={styles.header}>
         <div className={styles.headerTop}>
           <div
@@ -411,6 +413,26 @@ function TournamentView({ data }) {
 // --- Ranking table ---
 
 function RankingTable({ standings, scoreLabel, isCompleted, highlightedId, compareIds, onHighlight, onCompare }) {
+  const prevRanksRef = useRef({})
+  const rowRefsRef = useRef({})
+
+  useEffect(() => {
+    const prev = prevRanksRef.current
+    const timers = []
+    standings.forEach((p, i) => {
+      const prevRank = prev[p.id]
+      const el = rowRefsRef.current[p.id]
+      if (el && prevRank !== undefined && prevRank !== i) {
+        el.classList.remove(styles.rankFlashUp, styles.rankFlashDown)
+        void el.offsetWidth
+        el.classList.add(prevRank > i ? styles.rankFlashUp : styles.rankFlashDown)
+        timers.push(setTimeout(() => el.classList.remove(styles.rankFlashUp, styles.rankFlashDown), 1200))
+      }
+    })
+    prevRanksRef.current = Object.fromEntries(standings.map((p, i) => [p.id, i]))
+    return () => timers.forEach(t => clearTimeout(t))
+  }, [standings])
+
   return (
     <div className={styles.rankingTableWrap}>
       <table className={styles.table}>
@@ -428,9 +450,13 @@ function RankingTable({ standings, scoreLabel, isCompleted, highlightedId, compa
             const isCompared = compareIds.includes(p.id)
             const isWinner = i === 0 && isCompleted
             const canAdd = compareIds.length < 2 || isCompared
+            const tiedWithNeighbor =
+              (i > 0 && standings[i - 1].total === p.total) ||
+              (i < standings.length - 1 && standings[i + 1].total === p.total)
             return (
               <tr
                 key={p.id}
+                ref={el => { if (el) rowRefsRef.current[p.id] = el; else delete rowRefsRef.current[p.id] }}
                 className={[
                   i === 0 ? styles.gold : i === 1 ? styles.silver : i === 2 ? styles.bronze : '',
                   isHighlighted ? styles.highlighted : '',
@@ -449,7 +475,14 @@ function RankingTable({ standings, scoreLabel, isCompleted, highlightedId, compa
                   </Link>
                   {isWinner && <TrophyIcon outline className={styles.trophyIcon} />}
                 </td>
-                <td>{p.total}</td>
+                <td>
+                  {p.total}
+                  {tiedWithNeighbor && (
+                    <span className={styles.winsCount} title="Rangert etter etappeseiere ved poenglikhet">
+                      {p.wins}v
+                    </span>
+                  )}
+                </td>
                 <td className={styles.compareCol}>
                   {canAdd && (
                     <button

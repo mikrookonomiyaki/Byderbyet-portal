@@ -295,6 +295,49 @@
   margin: 0.5rem 0 0;
 }
 
+.sparklineSection {
+  margin-bottom: 1.5rem;
+  background: #fff;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+
+.sparkline {
+  width: 100%;
+  max-width: 420px;
+  display: block;
+  margin-top: 0.5rem;
+  overflow: visible;
+}
+
+.sparklineLine {
+  fill: none;
+  stroke: #3b82f6;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sparklineDot {
+  fill: #3b82f6;
+}
+
+.sparklineRank {
+  font-size: 9px;
+  fill: #1a1a1a;
+  text-anchor: middle;
+  font-weight: 700;
+  font-family: system-ui, sans-serif;
+}
+
+.sparklineYear {
+  font-size: 8px;
+  fill: #999;
+  text-anchor: middle;
+  font-family: system-ui, sans-serif;
+}
+
 @media (max-width: 600px) {
   .header { padding: 0.75rem 1rem; }
   .main { padding: 1rem; }

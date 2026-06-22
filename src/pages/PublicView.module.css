@@ -736,6 +736,37 @@
   border-top: 2px solid #eee;
 }
 
+/* --- Rank change flash animations --- */
+
+@keyframes flashUp {
+  0% { background-color: #bbf7d0; }
+  100% { background-color: transparent; }
+}
+
+@keyframes flashDown {
+  0% { background-color: #fecaca; }
+  100% { background-color: transparent; }
+}
+
+.rankFlashUp td {
+  animation: flashUp 1.2s ease-out forwards;
+}
+
+.rankFlashDown td {
+  animation: flashDown 1.2s ease-out forwards;
+}
+
+/* --- Tiebreaker wins count badge --- */
+
+.winsCount {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 500;
+  vertical-align: middle;
+}
+
 @media (max-width: 600px) {
   .banner {
     font-size: 0.8rem;

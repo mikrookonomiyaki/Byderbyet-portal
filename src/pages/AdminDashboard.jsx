@@ -78,6 +78,23 @@ function TournamentEditor({ tournamentId }) {
   const [localResults, setLocalResults] = useState({})
   const [completing, setCompleting] = useState(false)
 
+  const [bannerText, setBannerText] = useState('')
+  const [bannerSaving, setBannerSaving] = useState(false)
+  const [bannerSaved, setBannerSaved] = useState(false)
+
+  useEffect(() => {
+    supabase.from('tournaments').select('banner_text').eq('id', tournamentId).single()
+      .then(({ data: t }) => { if (t) setBannerText(t.banner_text ?? '') })
+  }, [tournamentId])
+
+  async function saveBannerText() {
+    setBannerSaving(true)
+    await supabase.from('tournaments').update({ banner_text: bannerText.trim() || null }).eq('id', tournamentId)
+    setBannerSaving(false)
+    setBannerSaved(true)
+    setTimeout(() => setBannerSaved(false), 2000)
+  }
+
   useEffect(() => {
     if (!data) return
     const map = {}
@@ -210,6 +227,25 @@ function TournamentEditor({ tournamentId }) {
         <span className={styles.completionHint}>
           {isCompleted ? 'Pokaler og medaljer er synlige.' : 'Pokaler og medaljer skjules til turneringen avsluttes.'}
         </span>
+      </div>
+
+      {/* Banner text editor */}
+      <div className={styles.bannerEditor}>
+        <label className={styles.bannerLabel}>
+          Bannermelding (vises øverst på forsiden — la stå tom for å skjule)
+        </label>
+        <div className={styles.bannerInputRow}>
+          <input
+            type="text"
+            className={styles.bannerInput}
+            value={bannerText}
+            onChange={e => setBannerText(e.target.value)}
+            placeholder="Skriv inn bannermelding..."
+          />
+          <button className={styles.bannerSaveBtn} onClick={saveBannerText} disabled={bannerSaving}>
+            {bannerSaving ? 'Lagrer...' : bannerSaved ? 'Lagret' : 'Lagre'}
+          </button>
+        </div>
       </div>
 
       {/* Regular events score grid */}

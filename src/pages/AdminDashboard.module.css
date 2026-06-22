@@ -664,8 +664,61 @@
   color: #555;
 }
 
+.bannerEditor {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.bannerLabel {
+  display: block;
+  font-size: 0.8rem;
+  color: #555;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.bannerInputRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.bannerInput {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.bannerInput:focus {
+  border-color: #1a1a1a;
+}
+
+.bannerSaveBtn {
+  padding: 0.5rem 1rem;
+  background: #0f1e3c;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.bannerSaveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 @media (max-width: 600px) {
   .completionBar { padding: 0.6rem 0.75rem; }
   .duelCard { padding: 0.75rem; }
   .duelWinnerBtns { flex-direction: column; }
+  .bannerInputRow { flex-direction: column; }
 }

@@ -176,7 +176,12 @@ export default function ParticipantProfile() {
 
       const keywords = computeKeywordsFromAllResults(participantName, allResults, eventById, participantById, participantCountByEvent)
 
-      setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords })
+      const participantCountByYear = {}
+      tourRes.data.forEach(t => {
+        participantCountByYear[t.year] = allParticipantsRes.data.filter(p => p.tournament_id === t.id).length
+      })
+
+      setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords, participantCountByYear })
       setLoading(false)
     }
 
@@ -198,8 +203,48 @@ export default function ParticipantProfile() {
   )
 }
 
+function Sparkline({ years, standingByYear, participantCountByYear }) {
+  const sorted = [...years].sort((a, b) => a - b)
+  if (sorted.length < 2) return null
+
+  const W = 300, H = 80, padX = 20, padTop = 20, padBottom = 18
+  const n = sorted.length
+  const xScale = i => padX + (i / (n - 1)) * (W - 2 * padX)
+  const yScale = (rank, year) => {
+    const total = participantCountByYear[year] ?? rank
+    return padTop + ((rank - 1) / Math.max(total - 1, 1)) * (H - padTop - padBottom)
+  }
+
+  const points = sorted.map((y, i) => ({
+    x: xScale(i),
+    y: yScale(standingByYear[y] ?? 1, y),
+    year: y,
+    rank: standingByYear[y],
+  }))
+
+  const d = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ')
+
+  return (
+    <div className={styles.sparklineSection}>
+      <h2 className={styles.sectionTitle}>Utvikling</h2>
+      <svg viewBox={`0 0 ${W} ${H}`} className={styles.sparkline} aria-hidden="true">
+        <path d={d} className={styles.sparklineLine} />
+        {points.map(p => (
+          <g key={p.year}>
+            <circle cx={p.x} cy={p.y} r={3.5} className={styles.sparklineDot} />
+            {p.rank != null && (
+              <text x={p.x} y={p.y - 7} className={styles.sparklineRank}>{p.rank}.</text>
+            )}
+            <text x={p.x} y={H - 3} className={styles.sparklineYear}>{p.year}</text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  )
+}
+
 function ProfileView({ data }) {
-  const { years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords } = data
+  const { years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords, participantCountByYear } = data
   const allResults = Object.values(byYear).flat()
   const hasHansa = allResults.some(r => r.event.name.toLowerCase().includes('sanksjon'))
 
@@ -230,6 +275,10 @@ function ProfileView({ data }) {
           <span className={styles.statLabel}>År deltatt</span>
         </div>
       </div>
+
+      {years.length >= 2 && (
+        <Sparkline years={years} standingByYear={standingByYear} participantCountByYear={participantCountByYear} />
+      )}
 
       {byderbyWins.length > 0 && (
         <div className={styles.trophySection}>
