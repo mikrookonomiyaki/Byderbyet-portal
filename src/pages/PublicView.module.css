@@ -442,6 +442,259 @@
   flex-shrink: 0;
 }
 
+/* --- Countdown --- */
+
+.countdown {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: #0f1e3c;
+  border-radius: 8px;
+  color: #fff;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.countdownLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.countdownUnits {
+  display: flex;
+  gap: 1rem;
+}
+
+.countdownUnit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 2.5rem;
+}
+
+.countdownValue {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.countdownUnitLabel {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  margin-top: 0.2rem;
+}
+
+/* --- Compare button --- */
+
+.compareBtnCol {
+  width: 28px;
+  padding: 0 0.25rem !important;
+  text-align: center;
+}
+
+.compareBtn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid #ccc;
+  background: transparent;
+  color: #999;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: border-color 0.1s, color 0.1s, background 0.1s;
+}
+
+.compareBtn:hover {
+  border-color: #1e40af;
+  color: #1e40af;
+}
+
+.compareBtnActive {
+  border-color: #1e40af;
+  background: #1e40af;
+  color: #fff;
+}
+
+.compareBtnActive:hover {
+  background: #1e3a8a;
+  border-color: #1e3a8a;
+  color: #fff;
+}
+
+/* --- Row highlight --- */
+
+.highlighted td {
+  background: #eff6ff !important;
+}
+
+.stickyHighlighted {
+  background: #eff6ff !important;
+}
+
+/* --- Sort indicators --- */
+
+.sortActive {
+  background: #e0e7ff !important;
+  cursor: pointer;
+}
+
+.sortTotalActive {
+  font-weight: 700;
+}
+
+.sortTotalReset {
+  font-weight: 700;
+  color: #1e40af;
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+
+.sortColumnCell {
+  background: #f5f3ff;
+}
+
+/* --- Event history panel --- */
+
+.historyPanel {
+  margin-top: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  max-width: 360px;
+}
+
+.historyPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.historyPanelTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #555;
+}
+
+.historyPanelClose {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.historyPanelClose:hover {
+  color: #333;
+  background: #f0f0ee;
+}
+
+.historyPanelMsg {
+  color: #999;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.historyPanelList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.historyPanelItem {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  font-size: 0.9rem;
+}
+
+.historyPanelYear {
+  color: #999;
+  font-size: 0.8rem;
+  min-width: 2.5rem;
+}
+
+.historyPanelName {
+  color: #1a1a1a;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.historyPanelName:hover {
+  text-decoration: underline;
+}
+
+/* --- Compare panel --- */
+
+.comparePanel {
+  margin-top: 1.5rem;
+}
+
+.comparePanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.comparePanelTitle {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #999;
+  font-weight: 600;
+}
+
+.comparePanelClose {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.comparePanelClose:hover {
+  color: #333;
+  background: #f0f0ee;
+}
+
+.comparePlayerHead {
+  text-align: center;
+  font-weight: 700;
+}
+
+.compareWin {
+  background: #dcfce7 !important;
+  font-weight: 700;
+  color: #166534;
+}
+
+.compareTotal td {
+  font-weight: 700;
+  border-top: 2px solid #eee;
+}
+
 @media (max-width: 600px) {
   .banner {
     font-size: 0.8rem;

@@ -1,11 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import confetti from 'canvas-confetti'
 import { useTournamentData } from '../hooks/useTournamentData'
 import { useHallOfFame } from '../hooks/useHallOfFame'
 import TrophyIcon from '../components/TrophyIcon'
-import { getEventIcon } from '../utils/eventIcons'
+import { canonicalize } from '../eventNames'
 import styles from './PublicView.module.css'
+
+// Module-level cache so event history is fetched at most once per event name per page load
+const eventHistoryCache = {}
 
 function HallOfFame() {
   const winners = useHallOfFame()
@@ -99,7 +103,7 @@ export default function PublicView() {
         {loading && <p className={styles.status}>Laster...</p>}
         {error && <p className={styles.error}>Feil: {error}</p>}
         {data && data.events.length === 0 && <EmptyTournament year={tournaments.find(t => t.id === selectedId)?.year} />}
-        {data && data.events.length > 0 && <TournamentView data={data} />}
+        {data && data.events.length > 0 && <TournamentView key={selectedId} data={data} />}
       </main>
 
       <footer className={styles.footer}>
@@ -124,104 +128,7 @@ function EmptyTournament({ year }) {
           </tr>
         </thead>
         <tbody>
-          {['?', '?', '?'].map((_, i) => (
-            <tr key={i}>
-              <td>{i + 1}</td>
-              <td className={styles.emptyCell}>?</td>
-              <td className={styles.emptyCell}>?</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-const DAY_ORDER_PV = { Fredag: 0, Lørdag: 1, Søndag: 2 }
-
-function ScheduleSection({ events }) {
-  const grouped = {}
-  events.forEach(e => {
-    const day = e.day || 'Dag ikke satt'
-    if (!grouped[day]) grouped[day] = []
-    grouped[day].push(e)
-  })
-  const days = Object.keys(grouped).sort((a, b) =>
-    (DAY_ORDER_PV[a] ?? 99) - (DAY_ORDER_PV[b] ?? 99)
-  )
-  return (
-    <div className={styles.schedule}>
-      <p className={styles.scheduleLabel}>Program</p>
-      <div className={styles.scheduleDays}>
-        {days.map(day => (
-          <div key={day} className={styles.scheduleDay}>
-            <p className={styles.scheduleDayTitle}>{day}</p>
-            <ul className={styles.scheduleList}>
-              {grouped[day].map(e => (
-                <li key={e.id} className={styles.scheduleItem}>
-                  <span className={styles.scheduleIcon}>{getEventIcon(e.name)}</span>
-                  {e.name}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function TournamentView({ data }) {
-  const { events, duelEvents, standings, scoringDirection, isCompleted } = data
-  const scoreLabel = scoringDirection === 'desc' ? 'Poeng' : 'Doeng'
-
-  const allEvents = [
-    ...events,
-    ...(duelEvents ?? []).map(e => ({ ...e, displayName: `${e.name} (Duell)` })),
-  ].sort((a, b) => {
-    const da = DAY_ORDER_PV[a.day] ?? 99
-    const db = DAY_ORDER_PV[b.day] ?? 99
-    if (da !== db) return da - db
-    return (a.sort_order ?? 0) - (b.sort_order ?? 0)
-  })
-
-  return (
-    <div>
-      <RankingTable standings={standings} scoreLabel={scoreLabel} isCompleted={isCompleted} />
-      {allEvents.length > 0 && (
-        <div className={styles.detailSection}>
-          <p className={styles.detailLabel}>Øvelsesresultater</p>
-          <DetailTable standings={standings} events={allEvents} scoreLabel={scoreLabel} />
-        </div>
-      )}
-    </div>
-  )
-}
-
-function RankingTable({ standings, scoreLabel, isCompleted }) {
-  return (
-    <div className={styles.tableWrap}>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Deltaker</th>
-            <th>{scoreLabel}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {standings.length > 0 ? standings.map((p, i) => (
-            <tr key={p.id} className={i === 0 ? styles.gold : i === 1 ? styles.silver : i === 2 ? styles.bronze : ''}>
-              <td>{i + 1}</td>
-              <td>
-                <Link to={`/participant/${encodeURIComponent(p.name)}`} className={styles.nameLink}>
-                  {p.name}
-                </Link>
-                {i === 0 && isCompleted && <TrophyIcon outline className={styles.trophyIcon} />}
-              </td>
-              <td>{p.total}</td>
-            </tr>
-          )) : [1, 2, 3].map(i => (
+          {[1, 2, 3].map(i => (
             <tr key={i}>
               <td>{i}</td>
               <td className={styles.emptyCell}>?</td>
@@ -234,7 +141,337 @@ function RankingTable({ standings, scoreLabel, isCompleted }) {
   )
 }
 
-function DetailTable({ standings, events, scoreLabel }) {
+const DAY_ORDER_PV = { Fredag: 0, Lørdag: 1, Søndag: 2 }
+const TOURNAMENT_START_MS = new Date('2026-07-03T10:00:00').getTime()
+
+// --- Countdown ---
+
+function Countdown() {
+  const [ms, setMs] = useState(() => Math.max(0, TOURNAMENT_START_MS - Date.now()))
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      const left = Math.max(0, TOURNAMENT_START_MS - Date.now())
+      setMs(left)
+      if (left === 0) clearInterval(t)
+    }, 1000)
+    return () => clearInterval(t)
+  }, [])
+
+  if (ms <= 0) return null
+
+  const days = Math.floor(ms / 86400000)
+  const hours = Math.floor((ms % 86400000) / 3600000)
+  const minutes = Math.floor((ms % 3600000) / 60000)
+  const seconds = Math.floor((ms % 60000) / 1000)
+  const pad = n => String(n).padStart(2, '0')
+
+  return (
+    <div className={styles.countdown}>
+      <span className={styles.countdownLabel}>Turneringen starter om</span>
+      <div className={styles.countdownUnits}>
+        {[{ v: days, l: 'dager' }, { v: hours, l: 'timer' }, { v: minutes, l: 'min' }, { v: seconds, l: 'sek' }].map(({ v, l }) => (
+          <div key={l} className={styles.countdownUnit}>
+            <span className={styles.countdownValue}>{pad(v)}</span>
+            <span className={styles.countdownUnitLabel}>{l}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// --- Event history hook (lazy, cached) ---
+
+function useEventHistory(eventName) {
+  const [state, setState] = useState({ data: null, loading: false })
+
+  useEffect(() => {
+    if (!eventName) { setState({ data: null, loading: false }); return }
+    if (eventHistoryCache[eventName] !== undefined) {
+      setState({ data: eventHistoryCache[eventName], loading: false })
+      return
+    }
+    setState({ data: null, loading: true })
+
+    async function load() {
+      const evRes = await supabase
+        .from('events')
+        .select('id, tournament_id, name')
+        .neq('is_published', false)
+        .limit(10000)
+
+      const matching = (evRes.data ?? []).filter(e => canonicalize(e.name) === eventName)
+      if (matching.length === 0) {
+        eventHistoryCache[eventName] = []
+        setState({ data: [], loading: false })
+        return
+      }
+
+      const eventIds = matching.map(e => e.id)
+      const tournamentIds = [...new Set(matching.map(e => e.tournament_id))]
+
+      const [resRes, tourRes] = await Promise.all([
+        supabase.from('results').select('event_id, participant_id, placement').in('event_id', eventIds).eq('placement', 1),
+        supabase.from('tournaments').select('id, year').in('id', tournamentIds),
+      ])
+
+      const winners = resRes.data ?? []
+      if (winners.length === 0) {
+        eventHistoryCache[eventName] = []
+        setState({ data: [], loading: false })
+        return
+      }
+
+      const participantIds = [...new Set(winners.map(r => r.participant_id))]
+      const partRes = await supabase.from('participants').select('id, name').in('id', participantIds)
+
+      const partById = {}
+      ;(partRes.data ?? []).forEach(p => { partById[p.id] = p.name })
+      const tourById = {}
+      ;(tourRes.data ?? []).forEach(t => { tourById[t.id] = t.year })
+      const evTourMap = {}
+      matching.forEach(e => { evTourMap[e.id] = e.tournament_id })
+
+      const result = winners
+        .map(r => ({ year: tourById[evTourMap[r.event_id]], name: partById[r.participant_id] ?? '?' }))
+        .filter(r => r.year != null)
+        .sort((a, b) => b.year - a.year)
+
+      eventHistoryCache[eventName] = result
+      setState({ data: result, loading: false })
+    }
+
+    load().catch(() => setState({ data: null, loading: false }))
+  }, [eventName])
+
+  return state
+}
+
+// --- Event history panel (shown below matrix when a column is sorted) ---
+
+function EventHistoryPanel({ eventName, onClose }) {
+  const { data, loading } = useEventHistory(eventName)
+  return (
+    <div className={styles.historyPanel}>
+      <div className={styles.historyPanelHeader}>
+        <span className={styles.historyPanelTitle}>Tidligere vinnere: {eventName}</span>
+        <button className={styles.historyPanelClose} onClick={onClose}>Lukk</button>
+      </div>
+      {loading && <p className={styles.historyPanelMsg}>Laster...</p>}
+      {!loading && data && data.length === 0 && <p className={styles.historyPanelMsg}>Ingen historiske data</p>}
+      {data && data.length > 0 && (
+        <ul className={styles.historyPanelList}>
+          {data.map(({ year, name }) => (
+            <li key={year} className={styles.historyPanelItem}>
+              <span className={styles.historyPanelYear}>{year}</span>
+              <Link to={`/participant/${encodeURIComponent(name)}`} className={styles.historyPanelName}>{name}</Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+// --- Compare panel ---
+
+function ComparePanel({ players, events, scoringDirection, onClose }) {
+  const [p1, p2] = players
+  const better = (a, b) => a != null && b != null && (scoringDirection === 'desc' ? a > b : a < b)
+
+  return (
+    <div className={styles.comparePanel}>
+      <div className={styles.comparePanelHeader}>
+        <span className={styles.comparePanelTitle}>Sammenligning</span>
+        <button className={styles.comparePanelClose} onClick={onClose}>Lukk</button>
+      </div>
+      <div className={styles.tableWrap}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Øvelse</th>
+              <th className={styles.comparePlayerHead}>{p1.name}</th>
+              <th className={styles.comparePlayerHead}>{p2.name}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {events.map(e => {
+              const r1 = p1.eventResults[e.id]?.doeng
+              const r2 = p2.eventResults[e.id]?.doeng
+              return (
+                <tr key={e.id}>
+                  <td>{e.displayName ?? e.name}</td>
+                  <td className={better(r1, r2) ? styles.compareWin : ''}>{r1 != null ? r1 : '–'}</td>
+                  <td className={better(r2, r1) ? styles.compareWin : ''}>{r2 != null ? r2 : '–'}</td>
+                </tr>
+              )
+            })}
+            <tr className={styles.compareTotal}>
+              <td>Totalt</td>
+              <td className={better(p1.total, p2.total) ? styles.compareWin : ''}>{p1.total}</td>
+              <td className={better(p2.total, p1.total) ? styles.compareWin : ''}>{p2.total}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+// --- Main tournament view ---
+
+function TournamentView({ data }) {
+  const { events, duelEvents, standings, scoringDirection, isCompleted } = data
+  const scoreLabel = scoringDirection === 'desc' ? 'Poeng' : 'Doeng'
+
+  const [sortColumn, setSortColumn] = useState(null)
+  const [highlightedId, setHighlightedId] = useState(null)
+  const [compareIds, setCompareIds] = useState([])
+
+  const allEvents = useMemo(() => [
+    ...events,
+    ...(duelEvents ?? []).map(e => ({ ...e, displayName: `${e.name} (Duell)` })),
+  ].sort((a, b) => {
+    const da = DAY_ORDER_PV[a.day] ?? 99
+    const db = DAY_ORDER_PV[b.day] ?? 99
+    if (da !== db) return da - db
+    return (a.sort_order ?? 0) - (b.sort_order ?? 0)
+  }), [events, duelEvents])
+
+  const sortedStandings = useMemo(() => {
+    if (!sortColumn) return standings
+    return [...standings].sort((a, b) => {
+      const ra = a.eventResults[sortColumn]?.doeng
+      const rb = b.eventResults[sortColumn]?.doeng
+      if (ra == null && rb == null) return 0
+      if (ra == null) return 1
+      if (rb == null) return -1
+      return scoringDirection === 'desc' ? rb - ra : ra - rb
+    })
+  }, [standings, sortColumn, scoringDirection])
+
+  const handleHighlight = id => setHighlightedId(prev => prev === id ? null : id)
+  const handleCompare = id => setCompareIds(prev =>
+    prev.includes(id) ? prev.filter(x => x !== id) : prev.length < 2 ? [...prev, id] : prev
+  )
+  const handleSort = eventId => setSortColumn(prev => prev === eventId ? null : eventId)
+
+  const comparePlayers = compareIds.map(id => sortedStandings.find(p => p.id === id)).filter(Boolean)
+  const sortedEvent = sortColumn ? allEvents.find(e => e.id === sortColumn) : null
+
+  return (
+    <div>
+      {!isCompleted && <Countdown />}
+      <RankingTable
+        standings={sortedStandings}
+        scoreLabel={scoreLabel}
+        isCompleted={isCompleted}
+        highlightedId={highlightedId}
+        compareIds={compareIds}
+        onHighlight={handleHighlight}
+        onCompare={handleCompare}
+      />
+      {allEvents.length > 0 && (
+        <div className={styles.detailSection}>
+          <p className={styles.detailLabel}>Øvelsesresultater</p>
+          <DetailTable
+            standings={sortedStandings}
+            events={allEvents}
+            scoreLabel={scoreLabel}
+            sortColumn={sortColumn}
+            onSort={handleSort}
+            highlightedId={highlightedId}
+            compareIds={compareIds}
+            onHighlight={handleHighlight}
+            onCompare={handleCompare}
+          />
+        </div>
+      )}
+      {sortedEvent && (
+        <EventHistoryPanel eventName={sortedEvent.name} onClose={() => setSortColumn(null)} />
+      )}
+      {comparePlayers.length === 2 && (
+        <ComparePanel
+          players={comparePlayers}
+          events={allEvents}
+          scoringDirection={scoringDirection}
+          onClose={() => setCompareIds([])}
+        />
+      )}
+    </div>
+  )
+}
+
+// --- Ranking table ---
+
+function RankingTable({ standings, scoreLabel, isCompleted, highlightedId, compareIds, onHighlight, onCompare }) {
+  return (
+    <div className={styles.tableWrap}>
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            <th className={styles.compareBtnCol}></th>
+            <th>#</th>
+            <th>Deltaker</th>
+            <th>{scoreLabel}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {standings.length > 0 ? standings.map((p, i) => {
+            const isHighlighted = highlightedId === p.id
+            const isCompared = compareIds.includes(p.id)
+            const isWinner = i === 0 && isCompleted
+            return (
+              <tr
+                key={p.id}
+                className={[
+                  i === 0 ? styles.gold : i === 1 ? styles.silver : i === 2 ? styles.bronze : '',
+                  isHighlighted ? styles.highlighted : '',
+                ].filter(Boolean).join(' ')}
+                onClick={e => {
+                  if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return
+                  onHighlight(p.id)
+                  if (isWinner) confetti({ particleCount: 130, spread: 80, origin: { y: 0.55 } })
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <td className={styles.compareBtnCol}>
+                  <button
+                    className={`${styles.compareBtn} ${isCompared ? styles.compareBtnActive : ''}`}
+                    onClick={() => onCompare(p.id)}
+                    title={isCompared ? 'Fjern fra sammenligning' : 'Legg til sammenligning'}
+                  >
+                    {isCompared ? '−' : '+'}
+                  </button>
+                </td>
+                <td>{i + 1}</td>
+                <td>
+                  <Link to={`/participant/${encodeURIComponent(p.name)}`} className={styles.nameLink}>
+                    {p.name}
+                  </Link>
+                  {isWinner && <TrophyIcon outline className={styles.trophyIcon} />}
+                </td>
+                <td>{p.total}</td>
+              </tr>
+            )
+          }) : [1, 2, 3].map(i => (
+            <tr key={i}>
+              <td className={styles.compareBtnCol}></td>
+              <td>{i}</td>
+              <td className={styles.emptyCell}>?</td>
+              <td className={styles.emptyCell}>?</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+// --- Detail matrix table ---
+
+function DetailTable({ standings, events, scoreLabel, sortColumn, onSort, highlightedId, compareIds, onHighlight, onCompare }) {
   const days = [...new Set(events.map(e => e.day))].filter(Boolean)
     .sort((a, b) => (DAY_ORDER_PV[a] ?? 99) - (DAY_ORDER_PV[b] ?? 99))
   const noDayCount = events.filter(e => !e.day).length
@@ -244,6 +481,7 @@ function DetailTable({ standings, events, scoreLabel }) {
       <table className={styles.table}>
         <thead>
           <tr>
+            <th className={styles.compareBtnCol}></th>
             <th className={styles.sticky}>Deltaker</th>
             {days.map(day => (
               <th key={day} colSpan={events.filter(e => e.day === day).length} className={styles.dayHeader}>
@@ -253,16 +491,31 @@ function DetailTable({ standings, events, scoreLabel }) {
             {noDayCount > 0 && (
               <th colSpan={noDayCount} className={styles.dayHeader}>Dag ikke satt</th>
             )}
-            <th>{scoreLabel} totalt</th>
+            <th
+              className={!sortColumn ? styles.sortTotalActive : styles.sortTotalReset}
+              onClick={() => onSort(sortColumn)}
+              style={sortColumn ? { cursor: 'pointer' } : {}}
+              title={sortColumn ? 'Tilbakestill sortering' : undefined}
+            >
+              {scoreLabel} totalt
+            </th>
           </tr>
           <tr>
+            <th className={styles.compareBtnCol}></th>
             <th className={styles.sticky}></th>
             {events.map(e => (
-              <th key={e.id} className={styles.eventHeader}>
+              <th
+                key={e.id}
+                className={`${styles.eventHeader} ${sortColumn === e.id ? styles.sortActive : ''}`}
+                onClick={() => onSort(e.id)}
+                style={{ cursor: 'pointer' }}
+                title="Klikk for å sortere etter denne øvelsen"
+              >
                 <div className={styles.eventHeaderInner}>
                   <Link
                     to={`/event/${encodeURIComponent(e.name)}`}
                     className={styles.eventLink}
+                    onClick={ev => ev.stopPropagation()}
                   >
                     {e.displayName ?? e.name}
                   </Link>
@@ -273,25 +526,44 @@ function DetailTable({ standings, events, scoreLabel }) {
           </tr>
         </thead>
         <tbody>
-          {standings.length > 0 ? standings.map(p => (
-            <tr key={p.id}>
-              <td className={styles.sticky}>
-                <Link to={`/participant/${encodeURIComponent(p.name)}`} className={styles.nameLink}>
-                  {p.name}
-                </Link>
-              </td>
-              {events.map(e => {
-                const r = p.eventResults[e.id]
-                return (
-                  <td key={e.id} className={styles.cell}>
-                    {r != null ? r.doeng : ''}
+          {standings.length > 0 ? standings.map(p => {
+            const isHighlighted = highlightedId === p.id
+            const isCompared = compareIds.includes(p.id)
+            return (
+              <tr
+                key={p.id}
+                className={isHighlighted ? styles.highlighted : ''}
+                onClick={e => {
+                  if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return
+                  onHighlight(p.id)
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <td className={styles.compareBtnCol}>
+                  <button
+                    className={`${styles.compareBtn} ${isCompared ? styles.compareBtnActive : ''}`}
+                    onClick={() => onCompare(p.id)}
+                    title={isCompared ? 'Fjern fra sammenligning' : 'Legg til sammenligning'}
+                  >
+                    {isCompared ? '−' : '+'}
+                  </button>
+                </td>
+                <td className={`${styles.sticky} ${isHighlighted ? styles.stickyHighlighted : ''}`}>
+                  <Link to={`/participant/${encodeURIComponent(p.name)}`} className={styles.nameLink}>
+                    {p.name}
+                  </Link>
+                </td>
+                {events.map(e => (
+                  <td key={e.id} className={`${styles.cell} ${sortColumn === e.id ? styles.sortColumnCell : ''}`}>
+                    {p.eventResults[e.id] != null ? p.eventResults[e.id].doeng : ''}
                   </td>
-                )
-              })}
-              <td className={styles.total}>{p.total}</td>
-            </tr>
-          )) : [1, 2, 3].map(i => (
+                ))}
+                <td className={styles.total}>{p.total}</td>
+              </tr>
+            )
+          }) : [1, 2, 3].map(i => (
             <tr key={i}>
+              <td className={styles.compareBtnCol}></td>
               <td className={`${styles.sticky} ${styles.emptyCell}`}>?</td>
               {events.map(e => <td key={e.id} className={styles.cell}></td>)}
               <td className={styles.total}></td>
