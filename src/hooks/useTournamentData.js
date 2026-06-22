@@ -40,14 +40,16 @@ export function useTournamentData(tournamentId, refreshKey = 0, { publishedOnly 
         return (a.sort_order ?? 0) - (b.sort_order ?? 0)
       })
 
-      // Events for display: always show all events regardless of publishedOnly
+      // Regular events for display: always show all regardless of publishedOnly
       const events = allEvents.filter(e => !e.is_duel)
-      const duelEvents = allEvents.filter(e => e.is_duel)
 
       // Events for scoring: only published events (so unpublished results stay hidden)
       const visibleEvents = publishedOnly
         ? allEvents.filter(e => e.is_published !== false)
         : allEvents
+
+      // Duel events: only show when published (i.e. when results exist)
+      const duelEvents = visibleEvents.filter(e => e.is_duel)
 
       const participants = participantsRes.data
 
