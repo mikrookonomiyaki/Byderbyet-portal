@@ -99,11 +99,7 @@ export default function PublicView() {
         {loading && <p className={styles.status}>Laster...</p>}
         {error && <p className={styles.error}>Feil: {error}</p>}
         {data && data.events.length === 0 && <EmptyTournament year={tournaments.find(t => t.id === selectedId)?.year} />}
-        {data && data.events.length > 0 && (
-          data.standings.some(p => Object.keys(p.eventResults).length > 0)
-            ? <TournamentView data={data} />
-            : <ScheduleSection events={data.events} />
-        )}
+        {data && data.events.length > 0 && <TournamentView data={data} />}
       </main>
 
       <footer className={styles.footer}>
