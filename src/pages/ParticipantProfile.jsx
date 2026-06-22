@@ -35,31 +35,50 @@ export default function ParticipantProfile() {
         return
       }
 
-      // Scope events, scales, and results to only tournaments this player participated in
       const myTourIds = matchingParticipants.map(p => p.tournament_id)
+      const myTourIdSet = new Set(myTourIds)
 
-      const [eventsRes, scalesRes] = await Promise.all([
-        supabase.from('events').select('*').in('tournament_id', myTourIds).neq('is_published', false).limit(10000),
+      // Fetch ALL published events (all years) so keyword ranking matches CategoryView.
+      // Scales are only needed for Ingunn's tournaments (doeng computation for display).
+      const [allEventsRes, scalesRes] = await Promise.all([
+        supabase.from('events').select('*').neq('is_published', false).limit(10000),
         supabase.from('doeng_scale').select('*').in('tournament_id', myTourIds).limit(10000),
       ])
-      for (const r of [eventsRes, scalesRes]) {
+      for (const r of [allEventsRes, scalesRes]) {
         if (r.error) { setError(r.error.message); setLoading(false); return }
       }
 
-      // Fetch results per tournament to avoid the 1000-row Supabase page cap
-      // A single cross-year query can exceed 1000 rows and silently truncate.
-      const allResults = []
-      for (const tourId of myTourIds) {
-        const tourEventIds = eventsRes.data.filter(e => e.tournament_id === tourId).map(e => e.id)
-        if (tourEventIds.length === 0) continue
-        const { data: tourResults, error: rErr } = await supabase
-          .from('results').select('*').in('event_id', tourEventIds).limit(10000)
-        if (rErr) { setError(rErr.message); setLoading(false); return }
-        allResults.push(...tourResults)
+      // Group published events by tournament for efficient per-tournament result fetching
+      const eventsByTour = {}
+      allEventsRes.data.forEach(e => {
+        if (!eventsByTour[e.tournament_id]) eventsByTour[e.tournament_id] = []
+        eventsByTour[e.tournament_id].push(e)
+      })
+
+      // Fetch results for ALL tournaments in parallel (needed for accurate keyword ranking)
+      let allResults = []
+      try {
+        const resultArrays = await Promise.all(
+          Object.entries(eventsByTour).map(async ([, events]) => {
+            const ids = events.map(e => e.id)
+            const { data, error } = await supabase.from('results').select('*').in('event_id', ids).limit(10000)
+            if (error) throw error
+            return data
+          })
+        )
+        allResults = resultArrays.flat()
+      } catch (err) {
+        setError(err.message); setLoading(false); return
       }
 
+      // Subset of results scoped to Ingunn's tournaments (used for display/standings)
+      const myEventIds = new Set(
+        allEventsRes.data.filter(e => myTourIdSet.has(e.tournament_id)).map(e => e.id)
+      )
+      const myTourResults = allResults.filter(r => myEventIds.has(r.event_id))
+
       const eventById = {}
-      eventsRes.data.forEach(e => { eventById[e.id] = { ...e, name: canonicalize(e.name) } })
+      allEventsRes.data.forEach(e => { eventById[e.id] = { ...e, name: canonicalize(e.name) } })
 
       const scaleByTournament = {}
       scalesRes.data.forEach(s => {
@@ -77,9 +96,10 @@ export default function ParticipantProfile() {
         return event.is_hansa ? result.placement : (scale[result.placement] ?? result.placement)
       }
 
-      // Compute total per participant per tournament (needed for standings and byderby)
+      // Compute total per participant per tournament using only Ingunn's tournaments
+      // (scaleByTournament only covers those years, and standings are per-tournament)
       const totalByParticipant = {}
-      allResults.forEach(r => {
+      myTourResults.forEach(r => {
         const p = participantById[r.participant_id]
         if (!p) return
         const key = `${p.tournament_id}::${p.id}`
@@ -113,10 +133,10 @@ export default function ParticipantProfile() {
         standingByYear[t.year] = rank
       })
 
-      // Build year -> results for this participant
+      // Build year -> results for this participant (scoped to their own tournaments)
       const myResultIds = new Set(matchingParticipants.map(p => p.id))
       const byYear = {}
-      allResults
+      myTourResults
         .filter(r => myResultIds.has(r.participant_id))
         .forEach(r => {
           const event = eventById[r.event_id]

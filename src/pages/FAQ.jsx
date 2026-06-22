@@ -32,8 +32,20 @@ const QAS = [
     a: 'Byderbyet er en uformell idrettskonkurranse mellom venner og bekjente. Over én helg møtes deltakerne til kamp i en rekke øvelser — fra darts og volleyball til quiz og petanque. Det handler like mye om god stemning og dårlig tapersinn som om seier.',
   },
   {
-    q: 'Kan jeg se resultater fra tidligere år?',
-    a: 'Ja. Bruk fanevalget øverst på forsiden for å bla mellom aktiv turnering og historiske resultater. Klikk på et deltakernavn for å åpne profilen, som viser statistikk, pokaler og adjektiver på tvers av alle år vedkommende har deltatt.',
+    q: 'Hva betyr "Doeng"?',
+    a: 'Doeng er poengsystemet i Byderbyet. Lavest mulig doeng er målet — akkurat som i golf. Plasseringen fra hver øvelse oversettes til doeng via en fast skala, og totalsummen avgjør den endelige rangeringen. Den med lavest sum vinner.',
+  },
+  {
+    q: 'Hvordan beregnes doeng per øvelse?',
+    a: doengTable,
+  },
+  {
+    q: 'Hva skjer ved doenglikhet?',
+    a: 'Ved uavgjort doeng-total er det antall etappeseiere som avgjør — altså antall øvelser du har vunnet. Hvis dette også er likt, er det best av tre i stein-saks-papir.',
+  },
+  {
+    q: 'Hva er en Duell?',
+    a: 'En duell er en en-mot-en-konkurranse mellom to utvalgte deltakere. Man får −5 doeng for å vinne og +5 for å tape. Dueller kan foregå i alt fra Beyblade til Jenga — det er arrangøren som bestemmer øvelsen, og de foregår typisk spredt utover helgen.',
   },
   {
     q: 'Hvorfor har jeg fått de adjektivene jeg har fått?',
@@ -44,24 +56,8 @@ const QAS = [
     a: 'Mastergrad-hatten dukker opp på adjektiver der du har oppnådd elitenivå — altså at du er blant de to best rangerte i den aktuelle kategorien. Det er den høyeste utmerkelsen i et ferdighetsområde. Klikk på adjektivet for å se alle deltakere rangert i samme kategori.',
   },
   {
-    q: 'Hva betyr "Doeng"?',
-    a: 'Doeng er poengsystemet i Byderbyet. Lavest mulig doeng er målet — akkurat som i golf. Plasseringen fra hver øvelse oversettes til doeng via en fast skala, og totalsummen avgjør den endelige rangeringen. Den med lavest sum vinner.',
-  },
-  {
-    q: 'Hvordan beregnes doeng per øvelse?',
-    a: doengTable,
-  },
-  {
-    q: 'Hva er en Duell?',
-    a: 'En duell er en en-mot-en-konkurranse mellom to utvalgte deltakere. Vinneren belønnes med −2 doeng, mens taperen straffes med +2 doeng. Dueller kan foregå i alt fra Beyblade til Jenga — det er arrangøren som bestemmer øvelsen, og de foregår typisk spredt utover helgen.',
-  },
-  {
     q: 'Hva er Hansa-sanksjonen?',
     a: 'Hansa-sanksjonen er Byderbyet sin offisielle reaksjon på ett av de groveste bruddene i konkurransen: å dukke opp med en drikkevare produsert av Hansa Bryggeri. Det er ikke bare et dårlig valg — det er en erklæring om at du ikke respekterer verken deg selv, Byderbyet eller de rundt deg. Straffen er umiddelbar og nådeløs: et vilkårlig antall doeng legges rett til i totalen din, ingen skala, ingen anke, ingen juridisk bistand. Arrangøren er dommer, jury og bøddel. Deltakere som har mottatt sanksjonen, bærer merket "Hansa-dranker" på profilen sin — for alltid. La det være en advarsel: det finnes gode øl i verden. Hansa er ikke blant dem.',
-  },
-  {
-    q: 'Hva er Æresgalleriet?',
-    a: 'Æresgalleriet øverst på forsiden viser alle tidligere Byderby-vinnere — én per år. Vinneren er den som hadde lavest total doeng da turneringen ble avsluttet. En gullpokal på profilsiden markerer vinnere, sølv- og bronseemblemer markerer 2.- og 3.-plass i avsluttede turneringer.',
   },
   {
     q: 'Hvem kan delta i Byderbyet?',
@@ -70,10 +66,6 @@ const QAS = [
   {
     q: 'Når oppdateres resultatene på siden?',
     a: 'Resultater legges inn av administrator underveis i turneringen. Så snart en øvelse er publisert, vises poengene umiddelbart på forsiden og rangeringen oppdateres i sanntid — du kan følge med på mobilen mellom øvelsene.',
-  },
-  {
-    q: 'Hva skjer ved poenglikhet?',
-    a: 'Det er ikke noe automatisk tiebreak-system. Ved lik doeng-total avgjøres rekkefølgen etter avtale med arrangøren — gjerne på bakgrunn av antall etappeseiere eller en plutselig-død-ekstraøvelse.',
   },
 ]
 
