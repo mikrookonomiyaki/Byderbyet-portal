@@ -361,44 +361,47 @@ function TournamentView({ data }) {
   const sortedEvent = sortColumn ? allEvents.find(e => e.id === sortColumn) : null
 
   return (
-    <div className={styles.tournamentLayout}>
-      <div className={styles.tournamentMain}>
-        {!isCompleted && <Countdown />}
-        <RankingTable
-          standings={sortedStandings}
-          scoreLabel={scoreLabel}
-          isCompleted={isCompleted}
-          highlightedId={highlightedId}
-          compareIds={compareIds}
-          onHighlight={handleHighlight}
-          onCompare={handleCompare}
-        />
-        {allEvents.length > 0 && (
-          <div className={styles.detailSection}>
-            <p className={styles.detailLabel}>Øvelsesresultater</p>
-            <DetailTable
-              standings={sortedStandings}
+    <div>
+      {!isCompleted && <Countdown />}
+      <RankingTable
+        standings={sortedStandings}
+        scoreLabel={scoreLabel}
+        isCompleted={isCompleted}
+        highlightedId={highlightedId}
+        compareIds={compareIds}
+        onHighlight={handleHighlight}
+        onCompare={handleCompare}
+      />
+      {allEvents.length > 0 && (
+        <div className={styles.detailSection}>
+          <p className={styles.detailLabel}>Øvelsesresultater</p>
+          <DetailTable
+            standings={sortedStandings}
+            events={allEvents}
+            scoreLabel={scoreLabel}
+            sortColumn={sortColumn}
+            onSort={handleSort}
+            highlightedId={highlightedId}
+            onHighlight={handleHighlight}
+          />
+        </div>
+      )}
+      {sortedEvent && (
+        <EventHistoryPanel eventName={sortedEvent.name} onClose={() => setSortColumn(null)} />
+      )}
+      {comparePlayers.length === 2 && (
+        <div
+          className={styles.modalBackdrop}
+          onClick={e => { if (e.target === e.currentTarget) setCompareIds([]) }}
+        >
+          <div className={styles.modalBox}>
+            <ComparePanel
+              players={comparePlayers}
               events={allEvents}
-              scoreLabel={scoreLabel}
-              sortColumn={sortColumn}
-              onSort={handleSort}
-              highlightedId={highlightedId}
-              onHighlight={handleHighlight}
+              scoringDirection={scoringDirection}
+              onClose={() => setCompareIds([])}
             />
           </div>
-        )}
-        {sortedEvent && (
-          <EventHistoryPanel eventName={sortedEvent.name} onClose={() => setSortColumn(null)} />
-        )}
-      </div>
-      {comparePlayers.length === 2 && (
-        <div className={styles.tournamentSide}>
-          <ComparePanel
-            players={comparePlayers}
-            events={allEvents}
-            scoringDirection={scoringDirection}
-            onClose={() => setCompareIds([])}
-          />
         </div>
       )}
     </div>
