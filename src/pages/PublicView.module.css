@@ -535,34 +535,31 @@
 
 .compareBtnAdd {
   background: none;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  color: #6b7280;
+  border: none;
+  color: #bbb;
   font-size: 0.75rem;
-  padding: 0.15rem 0.45rem;
+  padding: 0;
   cursor: pointer;
-  transition: border-color 0.1s, color 0.1s;
+  transition: color 0.1s;
 }
 
 .compareBtnAdd:hover {
-  border-color: #1e40af;
-  color: #1e40af;
+  color: #555;
 }
 
 .compareBtnSelected {
-  background: #1e40af;
-  border: 1px solid #1e40af;
-  border-radius: 4px;
-  color: #fff;
+  background: none;
+  border: none;
+  color: #1e40af;
   font-size: 0.75rem;
-  padding: 0.15rem 0.45rem;
+  font-weight: 600;
+  padding: 0;
   cursor: pointer;
-  transition: background 0.1s;
+  transition: color 0.1s;
 }
 
 .compareBtnSelected:hover {
-  background: #1e3a8a;
-  border-color: #1e3a8a;
+  color: #1e3a8a;
 }
 
 /* --- Row highlight --- */

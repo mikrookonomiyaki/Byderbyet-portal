@@ -144,7 +144,7 @@ function EmptyTournament({ year }) {
 }
 
 const DAY_ORDER_PV = { Fredag: 0, Lørdag: 1, Søndag: 2 }
-const TOURNAMENT_START_MS = new Date('2026-07-05T18:00:00').getTime()
+const TOURNAMENT_START_MS = new Date('2026-07-03T18:00:00').getTime()
 
 // --- Countdown ---
 
@@ -475,14 +475,7 @@ function RankingTable({ standings, scoreLabel, isCompleted, highlightedId, compa
                   </Link>
                   {isWinner && <TrophyIcon outline className={styles.trophyIcon} />}
                 </td>
-                <td>
-                  {p.total}
-                  {tiedWithNeighbor && (
-                    <span className={styles.winsCount} title="Rangert etter etappeseiere ved poenglikhet">
-                      {p.wins}v
-                    </span>
-                  )}
-                </td>
+                <td>{p.total}</td>
                 <td className={styles.compareCol}>
                   {canAdd && (
                     <button

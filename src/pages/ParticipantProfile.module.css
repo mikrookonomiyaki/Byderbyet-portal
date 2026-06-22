@@ -297,10 +297,7 @@
 
 .sparklineSection {
   margin-bottom: 1.5rem;
-  background: #fff;
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  padding: 0.25rem 0;
 }
 
 .sparkline {
@@ -313,14 +310,14 @@
 
 .sparklineLine {
   fill: none;
-  stroke: #3b82f6;
+  stroke: #1a1a1a;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .sparklineDot {
-  fill: #3b82f6;
+  fill: #1a1a1a;
 }
 
 .sparklineRank {

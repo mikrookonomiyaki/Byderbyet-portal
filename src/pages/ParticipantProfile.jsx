@@ -181,7 +181,7 @@ export default function ParticipantProfile() {
         participantCountByYear[t.year] = allParticipantsRes.data.filter(p => p.tournament_id === t.id).length
       })
 
-      setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords, participantCountByYear })
+      setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords, participantCountByYear, completedYears })
       setLoading(false)
     }
 
@@ -226,7 +226,6 @@ function Sparkline({ years, standingByYear, participantCountByYear }) {
 
   return (
     <div className={styles.sparklineSection}>
-      <h2 className={styles.sectionTitle}>Utvikling</h2>
       <svg viewBox={`0 0 ${W} ${H}`} className={styles.sparkline} aria-hidden="true">
         <path d={d} className={styles.sparklineLine} />
         {points.map(p => (
@@ -244,7 +243,7 @@ function Sparkline({ years, standingByYear, participantCountByYear }) {
 }
 
 function ProfileView({ data }) {
-  const { years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords, participantCountByYear } = data
+  const { years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords, participantCountByYear, completedYears } = data
   const allResults = Object.values(byYear).flat()
   const hasHansa = allResults.some(r => r.event.name.toLowerCase().includes('sanksjon'))
 
@@ -276,8 +275,8 @@ function ProfileView({ data }) {
         </div>
       </div>
 
-      {years.length >= 2 && (
-        <Sparkline years={years} standingByYear={standingByYear} participantCountByYear={participantCountByYear} />
+      {years.filter(y => completedYears.has(y)).length >= 2 && (
+        <Sparkline years={years.filter(y => completedYears.has(y))} standingByYear={standingByYear} participantCountByYear={participantCountByYear} />
       )}
 
       {byderbyWins.length > 0 && (
