@@ -248,6 +248,14 @@
   background: #fff;
 }
 
+/* Ranking table never needs horizontal scroll — no sticky columns, always fits */
+.rankingTableWrap {
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  background: #fff;
+  overflow: hidden;
+}
+
 .table {
   border-collapse: collapse;
   width: 100%;
@@ -490,34 +498,29 @@
   margin-top: 0.2rem;
 }
 
-/* --- Tournament two-column layout (main + compare side panel) --- */
+/* --- Compare modal --- */
 
-.tournamentLayout {
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 200;
   display: flex;
-  gap: 1.75rem;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
 }
 
-.tournamentMain {
-  flex: 1;
-  min-width: 0;
-}
-
-.tournamentSide {
-  width: 380px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 1rem;
-}
-
-@media (max-width: 860px) {
-  .tournamentLayout {
-    flex-direction: column;
-  }
-  .tournamentSide {
-    width: 100%;
-    position: static;
-  }
+.modalBox {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.28);
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 /* --- Compare column and buttons --- */
@@ -673,13 +676,12 @@
   text-decoration: underline;
 }
 
-/* --- Compare panel (side panel) --- */
+/* --- Compare panel (rendered inside modal box) --- */
 
 .comparePanel {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .comparePanelHeader {
@@ -689,6 +691,8 @@
   padding: 0.75rem 1rem;
   background: #0f1e3c;
   color: #fff;
+  border-radius: 10px 10px 0 0;
+  flex-shrink: 0;
 }
 
 .comparePanelTitle {
