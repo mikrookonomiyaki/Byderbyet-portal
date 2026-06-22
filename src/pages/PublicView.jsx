@@ -284,9 +284,9 @@ function ComparePanel({ players, events, scoringDirection, onClose }) {
     <div className={styles.comparePanel}>
       <div className={styles.comparePanelHeader}>
         <span className={styles.comparePanelTitle}>Sammenligning</span>
-        <button className={styles.comparePanelClose} onClick={onClose}>Lukk</button>
+        <button className={styles.comparePanelClose} onClick={onClose} title="Lukk">&#x2715;</button>
       </div>
-      <div className={styles.tableWrap}>
+      <div className={styles.tableWrap} style={{ borderRadius: 0, boxShadow: 'none' }}>
         <table className={styles.table}>
           <thead>
             <tr>
@@ -361,43 +361,45 @@ function TournamentView({ data }) {
   const sortedEvent = sortColumn ? allEvents.find(e => e.id === sortColumn) : null
 
   return (
-    <div>
-      {!isCompleted && <Countdown />}
-      <RankingTable
-        standings={sortedStandings}
-        scoreLabel={scoreLabel}
-        isCompleted={isCompleted}
-        highlightedId={highlightedId}
-        compareIds={compareIds}
-        onHighlight={handleHighlight}
-        onCompare={handleCompare}
-      />
-      {allEvents.length > 0 && (
-        <div className={styles.detailSection}>
-          <p className={styles.detailLabel}>Øvelsesresultater</p>
-          <DetailTable
-            standings={sortedStandings}
+    <div className={styles.tournamentLayout}>
+      <div className={styles.tournamentMain}>
+        {!isCompleted && <Countdown />}
+        <RankingTable
+          standings={sortedStandings}
+          scoreLabel={scoreLabel}
+          isCompleted={isCompleted}
+          highlightedId={highlightedId}
+          compareIds={compareIds}
+          onHighlight={handleHighlight}
+          onCompare={handleCompare}
+        />
+        {allEvents.length > 0 && (
+          <div className={styles.detailSection}>
+            <p className={styles.detailLabel}>Øvelsesresultater</p>
+            <DetailTable
+              standings={sortedStandings}
+              events={allEvents}
+              scoreLabel={scoreLabel}
+              sortColumn={sortColumn}
+              onSort={handleSort}
+              highlightedId={highlightedId}
+              onHighlight={handleHighlight}
+            />
+          </div>
+        )}
+        {sortedEvent && (
+          <EventHistoryPanel eventName={sortedEvent.name} onClose={() => setSortColumn(null)} />
+        )}
+      </div>
+      {comparePlayers.length === 2 && (
+        <div className={styles.tournamentSide}>
+          <ComparePanel
+            players={comparePlayers}
             events={allEvents}
-            scoreLabel={scoreLabel}
-            sortColumn={sortColumn}
-            onSort={handleSort}
-            highlightedId={highlightedId}
-            compareIds={compareIds}
-            onHighlight={handleHighlight}
-            onCompare={handleCompare}
+            scoringDirection={scoringDirection}
+            onClose={() => setCompareIds([])}
           />
         </div>
-      )}
-      {sortedEvent && (
-        <EventHistoryPanel eventName={sortedEvent.name} onClose={() => setSortColumn(null)} />
-      )}
-      {comparePlayers.length === 2 && (
-        <ComparePanel
-          players={comparePlayers}
-          events={allEvents}
-          scoringDirection={scoringDirection}
-          onClose={() => setCompareIds([])}
-        />
       )}
     </div>
   )
@@ -411,10 +413,10 @@ function RankingTable({ standings, scoreLabel, isCompleted, highlightedId, compa
       <table className={styles.table}>
         <thead>
           <tr>
-            <th className={styles.compareBtnCol}></th>
             <th>#</th>
             <th>Deltaker</th>
             <th>{scoreLabel}</th>
+            <th className={styles.compareCol}>Sammenlikn</th>
           </tr>
         </thead>
         <tbody>
@@ -422,6 +424,7 @@ function RankingTable({ standings, scoreLabel, isCompleted, highlightedId, compa
             const isHighlighted = highlightedId === p.id
             const isCompared = compareIds.includes(p.id)
             const isWinner = i === 0 && isCompleted
+            const canAdd = compareIds.length < 2 || isCompared
             return (
               <tr
                 key={p.id}
@@ -436,15 +439,6 @@ function RankingTable({ standings, scoreLabel, isCompleted, highlightedId, compa
                 }}
                 style={{ cursor: 'pointer' }}
               >
-                <td className={styles.compareBtnCol}>
-                  <button
-                    className={`${styles.compareBtn} ${isCompared ? styles.compareBtnActive : ''}`}
-                    onClick={() => onCompare(p.id)}
-                    title={isCompared ? 'Fjern fra sammenligning' : 'Legg til sammenligning'}
-                  >
-                    {isCompared ? '−' : '+'}
-                  </button>
-                </td>
                 <td>{i + 1}</td>
                 <td>
                   <Link to={`/participant/${encodeURIComponent(p.name)}`} className={styles.nameLink}>
@@ -453,14 +447,24 @@ function RankingTable({ standings, scoreLabel, isCompleted, highlightedId, compa
                   {isWinner && <TrophyIcon outline className={styles.trophyIcon} />}
                 </td>
                 <td>{p.total}</td>
+                <td className={styles.compareCol}>
+                  {canAdd && (
+                    <button
+                      className={isCompared ? styles.compareBtnSelected : styles.compareBtnAdd}
+                      onClick={() => onCompare(p.id)}
+                    >
+                      {isCompared ? 'Fjern' : 'Velg'}
+                    </button>
+                  )}
+                </td>
               </tr>
             )
           }) : [1, 2, 3].map(i => (
             <tr key={i}>
-              <td className={styles.compareBtnCol}></td>
               <td>{i}</td>
               <td className={styles.emptyCell}>?</td>
               <td className={styles.emptyCell}>?</td>
+              <td className={styles.compareCol}></td>
             </tr>
           ))}
         </tbody>
@@ -471,7 +475,7 @@ function RankingTable({ standings, scoreLabel, isCompleted, highlightedId, compa
 
 // --- Detail matrix table ---
 
-function DetailTable({ standings, events, scoreLabel, sortColumn, onSort, highlightedId, compareIds, onHighlight, onCompare }) {
+function DetailTable({ standings, events, scoreLabel, sortColumn, onSort, highlightedId, onHighlight }) {
   const days = [...new Set(events.map(e => e.day))].filter(Boolean)
     .sort((a, b) => (DAY_ORDER_PV[a] ?? 99) - (DAY_ORDER_PV[b] ?? 99))
   const noDayCount = events.filter(e => !e.day).length
@@ -481,7 +485,6 @@ function DetailTable({ standings, events, scoreLabel, sortColumn, onSort, highli
       <table className={styles.table}>
         <thead>
           <tr>
-            <th className={styles.compareBtnCol}></th>
             <th className={styles.sticky}>Deltaker</th>
             {days.map(day => (
               <th key={day} colSpan={events.filter(e => e.day === day).length} className={styles.dayHeader}>
@@ -501,7 +504,6 @@ function DetailTable({ standings, events, scoreLabel, sortColumn, onSort, highli
             </th>
           </tr>
           <tr>
-            <th className={styles.compareBtnCol}></th>
             <th className={styles.sticky}></th>
             {events.map(e => (
               <th
@@ -528,7 +530,6 @@ function DetailTable({ standings, events, scoreLabel, sortColumn, onSort, highli
         <tbody>
           {standings.length > 0 ? standings.map(p => {
             const isHighlighted = highlightedId === p.id
-            const isCompared = compareIds.includes(p.id)
             return (
               <tr
                 key={p.id}
@@ -539,15 +540,6 @@ function DetailTable({ standings, events, scoreLabel, sortColumn, onSort, highli
                 }}
                 style={{ cursor: 'pointer' }}
               >
-                <td className={styles.compareBtnCol}>
-                  <button
-                    className={`${styles.compareBtn} ${isCompared ? styles.compareBtnActive : ''}`}
-                    onClick={() => onCompare(p.id)}
-                    title={isCompared ? 'Fjern fra sammenligning' : 'Legg til sammenligning'}
-                  >
-                    {isCompared ? '−' : '+'}
-                  </button>
-                </td>
                 <td className={`${styles.sticky} ${isHighlighted ? styles.stickyHighlighted : ''}`}>
                   <Link to={`/participant/${encodeURIComponent(p.name)}`} className={styles.nameLink}>
                     {p.name}
@@ -563,7 +555,6 @@ function DetailTable({ standings, events, scoreLabel, sortColumn, onSort, highli
             )
           }) : [1, 2, 3].map(i => (
             <tr key={i}>
-              <td className={styles.compareBtnCol}></td>
               <td className={`${styles.sticky} ${styles.emptyCell}`}>?</td>
               {events.map(e => <td key={e.id} className={styles.cell}></td>)}
               <td className={styles.total}></td>
