@@ -260,24 +260,6 @@ function ProfileView({ data }) {
           {hasHansa && <span className={styles.hansaKeyword}>Hansa-dranker</span>}
         </div>
       )}
-      <div className={styles.stats}>
-        <div className={styles.stat}>
-          <span className={styles.statVal}>{avgPlacement ?? '—'}</span>
-          <span className={styles.statLabel}>Snitt plassering</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statVal}>{etappeseiere.length}</span>
-          <span className={styles.statLabel}>Etappeseiere</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statVal}>{years.length}</span>
-          <span className={styles.statLabel}>År deltatt</span>
-        </div>
-      </div>
-
-      {years.filter(y => completedYears.has(y)).length >= 2 && (
-        <Sparkline years={years.filter(y => completedYears.has(y))} standingByYear={standingByYear} participantCountByYear={participantCountByYear} />
-      )}
 
       {byderbyWins.length > 0 && (
         <div className={styles.trophySection}>
@@ -303,6 +285,10 @@ function ProfileView({ data }) {
         </div>
       )}
 
+      {years.filter(y => completedYears.has(y)).length >= 2 && (
+        <Sparkline years={years.filter(y => completedYears.has(y))} standingByYear={standingByYear} participantCountByYear={participantCountByYear} />
+      )}
+
       {etappeseiere.length > 0 && (
         <div className={styles.etappeSection}>
           <h2 className={styles.sectionTitle}>Etappeseiere</h2>
@@ -320,6 +306,21 @@ function ProfileView({ data }) {
           </div>
         </div>
       )}
+
+      <div className={styles.stats}>
+        <div className={styles.stat}>
+          <span className={styles.statVal}>{avgPlacement ?? '—'}</span>
+          <span className={styles.statLabel}>Snitt plassering</span>
+        </div>
+        <div className={styles.stat}>
+          <span className={styles.statVal}>{etappeseiere.length}</span>
+          <span className={styles.statLabel}>Etappeseiere</span>
+        </div>
+        <div className={styles.stat}>
+          <span className={styles.statVal}>{years.length}</span>
+          <span className={styles.statLabel}>År deltatt</span>
+        </div>
+      </div>
 
       {years.map(year => {
         const results = (byYear[year] ?? []).slice().sort((a, b) => a.placement - b.placement)
