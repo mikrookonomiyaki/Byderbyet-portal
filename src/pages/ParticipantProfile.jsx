@@ -95,9 +95,15 @@ export default function ParticipantProfile() {
       const completedYears = new Set(
         tourRes.data.filter(t => t.is_completed !== false).map(t => t.year)
       )
-      const byderbyWins = (hofData ?? [])
-        .filter(w => w.name.toLowerCase() === participantName.toLowerCase() && completedYears.has(w.year))
-        .map(w => w.year)
+      const overrideWins = tourRes.data
+        .filter(t => t.winner_override?.toLowerCase() === participantName.toLowerCase() && completedYears.has(t.year))
+        .map(t => t.year)
+      const byderbyWins = [
+        ...(hofData ?? [])
+          .filter(w => w.name.toLowerCase() === participantName.toLowerCase() && completedYears.has(w.year))
+          .map(w => w.year),
+        ...overrideWins,
+      ].filter((y, i, arr) => arr.indexOf(y) === i).sort((a, b) => b - a)
 
       // Compute final standing per year
       const standingByYear = {}
