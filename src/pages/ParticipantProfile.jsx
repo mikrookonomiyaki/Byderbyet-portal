@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import confetti from 'canvas-confetti'
 import { supabase } from '../supabaseClient'
 import { canonicalize } from '../eventNames'
 import TrophyIcon from '../components/TrophyIcon'
@@ -162,6 +163,9 @@ export default function ParticipantProfile() {
       })
 
       setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords, participantCountByYear })
+      if (byderbyWins.length > 0) {
+        confetti({ particleCount: 130, spread: 80, origin: { y: 0.55 } })
+      }
       setLoading(false)
     }
 
