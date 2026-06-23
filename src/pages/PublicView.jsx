@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import confetti from 'canvas-confetti'
 import { useTournamentData } from '../hooks/useTournamentData'
 import { useHallOfFame } from '../hooks/useHallOfFame'
 import TrophyIcon from '../components/TrophyIcon'
@@ -20,7 +21,7 @@ function HallOfFame() {
         {winners.map(w => (
           <li key={w.year} className={styles.hofItem}>
             <span className={styles.hofYear}>{w.year}</span>
-            <Link to={`/participant/${encodeURIComponent(w.name)}`} className={styles.hofName}>
+            <Link to={`/participant/${encodeURIComponent(w.name)}`} state={{ confetti: true }} className={styles.hofName}>
               {w.name}
             </Link>
             <TrophyIcon className={styles.hofIcon} />
@@ -326,6 +327,14 @@ function TournamentView({ data }) {
   const { events, duelEvents, standings, scoringDirection, isCompleted } = data
   const scoreLabel = scoringDirection === 'desc' ? 'Poeng' : 'Doeng'
 
+  const confettiFiredRef = useRef(false)
+  useEffect(() => {
+    if (isCompleted && standings.length > 0 && standings[0].total !== 0 && !confettiFiredRef.current) {
+      confettiFiredRef.current = true
+      confetti({ particleCount: 130, spread: 80, origin: { y: 0.55 } })
+    }
+  }, [isCompleted, standings])
+
   const [sortColumn, setSortColumn] = useState(null)
   const [highlightedId, setHighlightedId] = useState(null)
   const [compareIds, setCompareIds] = useState([])
@@ -468,7 +477,11 @@ function RankingTable({ standings, scoreLabel, isCompleted, highlightedId, compa
               >
                 <td>{i + 1}</td>
                 <td>
-                  <Link to={`/participant/${encodeURIComponent(p.name)}`} className={styles.nameLink}>
+                  <Link
+                    to={`/participant/${encodeURIComponent(p.name)}`}
+                    state={isWinner ? { confetti: true } : undefined}
+                    className={styles.nameLink}
+                  >
                     {p.name}
                   </Link>
                   {isWinner && <TrophyIcon outline className={styles.trophyIcon} />}
