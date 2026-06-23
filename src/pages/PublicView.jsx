@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
-import confetti from 'canvas-confetti'
 import { useTournamentData } from '../hooks/useTournamentData'
 import { useHallOfFame } from '../hooks/useHallOfFame'
 import TrophyIcon from '../components/TrophyIcon'
@@ -94,7 +93,7 @@ export default function PublicView() {
                   </button>
                 ))}
                 <span className={styles.tabSeparator} aria-hidden="true" />
-                <Link to="/events" className={`${styles.tab} ${styles.tabNav}`}>Øvelser</Link>
+                <Link to="/events" className={`${styles.tab} ${styles.tabNav}`}>Øvelsesoversikt</Link>
               </div>
             </div>
           )}
@@ -462,7 +461,6 @@ function RankingTable({ standings, scoreLabel, isCompleted, highlightedId, compa
                 onClick={e => {
                   if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return
                   onHighlight(p.id)
-                  if (isWinner) confetti({ particleCount: 130, spread: 80, origin: { y: 0.55 } })
                 }}
                 style={{ cursor: 'pointer' }}
               >

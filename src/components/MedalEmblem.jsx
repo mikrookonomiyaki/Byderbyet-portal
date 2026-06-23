@@ -22,7 +22,7 @@ export default function MedalEmblem({ year, type }) {
   }
 
   return (
-    <svg viewBox="0 0 44 64" width="38.5" height="56.1" xmlns="http://www.w3.org/2000/svg" aria-label={`${type === 'solv' ? 'Sølv' : 'Bronse'} ${year}`}>
+    <svg viewBox="0 0 44 64" width="57.75" height="84.15" xmlns="http://www.w3.org/2000/svg" aria-label={`${type === 'solv' ? 'Sølv' : 'Bronse'} ${year}`}>
       <defs>
         <radialGradient id={`${id}-grad`} cx="35%" cy="30%" r="65%">
           <stop offset="0%" stopColor={colors.gradHigh} />

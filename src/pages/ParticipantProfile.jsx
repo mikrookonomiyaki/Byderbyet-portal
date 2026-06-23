@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import confetti from 'canvas-confetti'
 import { supabase } from '../supabaseClient'
 import { canonicalize } from '../eventNames'
 import TrophyIcon from '../components/TrophyIcon'
@@ -114,9 +115,15 @@ export default function ParticipantProfile() {
       const completedYears = new Set(
         tourRes.data.filter(t => t.is_completed !== false).map(t => t.year)
       )
-      const byderbyWins = (hofData ?? [])
-        .filter(w => w.name.toLowerCase() === participantName.toLowerCase() && completedYears.has(w.year))
-        .map(w => w.year)
+      const overrideWins = tourRes.data
+        .filter(t => t.winner_override?.toLowerCase() === participantName.toLowerCase() && completedYears.has(t.year))
+        .map(t => t.year)
+      const byderbyWins = [
+        ...(hofData ?? [])
+          .filter(w => w.name.toLowerCase() === participantName.toLowerCase() && completedYears.has(w.year))
+          .map(w => w.year),
+        ...overrideWins,
+      ].filter((y, i, arr) => arr.indexOf(y) === i).sort((a, b) => b - a)
 
       // Compute final standing per year
       const standingByYear = {}
@@ -182,6 +189,9 @@ export default function ParticipantProfile() {
       })
 
       setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords, participantCountByYear, completedYears })
+      if (byderbyWins.length > 0) {
+        confetti({ particleCount: 130, spread: 80, origin: { y: 0.55 } })
+      }
       setLoading(false)
     }
 
