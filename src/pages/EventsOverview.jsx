@@ -11,35 +11,15 @@ export default function EventsOverview() {
 
   useEffect(() => {
     async function load() {
-      const [eventsRes, tourRes, resultsRes, partsRes] = await Promise.all([
-        supabase.from('events').select('id, name, tournament_id').neq('is_published', false).limit(10000),
-        supabase.from('tournaments').select('id, year'),
-        supabase.from('results').select('event_id, participant_id').eq('placement', 1).limit(10000),
-        supabase.from('participants').select('id, name').limit(10000),
-      ])
+      const eventsRes = await supabase.from('events').select('id, name, tournament_id').neq('is_published', false).limit(10000)
       if (eventsRes.error || !eventsRes.data) { setLoading(false); return }
 
-      const tourById = {}
-      ;(tourRes.data ?? []).forEach(t => { tourById[t.id] = t.year })
-
-      const partById = {}
-      ;(partsRes.data ?? []).forEach(p => { partById[p.id] = p.name })
-
-      const winnerByEvent = {}
-      ;(resultsRes.data ?? []).forEach(r => { winnerByEvent[r.event_id] = r.participant_id })
-
-      const counts = {}, displayName = {}, latestYear = {}, latestWinner = {}
+      const counts = {}, displayName = {}
       eventsRes.data.forEach(e => {
         const canonical = canonicalize(e.name)
         const key = canonical.toLowerCase()
         if (!displayName[key]) displayName[key] = canonical
         counts[key] = (counts[key] ?? 0) + 1
-        const year = tourById[e.tournament_id]
-        const winnerId = winnerByEvent[e.id]
-        if (year && winnerId && (latestYear[key] == null || year > latestYear[key])) {
-          latestYear[key] = year
-          latestWinner[key] = partById[winnerId] ?? null
-        }
       })
 
       const sorted = Object.entries(counts)
@@ -47,8 +27,6 @@ export default function EventsOverview() {
         .map(([key, count]) => ({
           name: displayName[key],
           count,
-          lastWinner: latestWinner[key] ?? null,
-          lastYear: latestYear[key] ?? null,
         }))
       setEvents(sorted)
       setLoading(false)
@@ -66,7 +44,7 @@ export default function EventsOverview() {
       <main className={styles.main}>
         {loading && <p className={styles.status}>Laster...</p>}
         <div className={styles.grid}>
-          {events.map(({ name, count, lastWinner, lastYear }) => (
+          {events.map(({ name, count }) => (
             <Link
               key={name}
               to={`/event/${encodeURIComponent(name)}`}
@@ -75,9 +53,6 @@ export default function EventsOverview() {
               <span className={styles.icon}>{getEventIcon(name)}</span>
               <span className={styles.name}>{name}</span>
               <span className={styles.count}>{count} {count === 1 ? 'år' : 'år'}</span>
-              {lastWinner && (
-                <span className={styles.lastWinner}>{lastWinner} ({lastYear})</span>
-              )}
             </Link>
           ))}
         </div>

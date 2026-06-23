@@ -275,14 +275,15 @@
   position: relative;
   flex-shrink: 0;
   align-self: center;
+  margin-left: 0.75rem;
 }
 
 .globalSearchInput {
-  width: 140px;
-  padding: 0.35rem 0.7rem;
+  width: 180px;
+  padding: 0.3rem 0.65rem;
   border: 1px solid rgba(255,255,255,0.2);
   border-radius: 6px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-family: inherit;
   background: rgba(255,255,255,0.08);
   color: #e2e8f0;
@@ -295,7 +296,7 @@
 }
 
 .globalSearchInput:focus {
-  width: 200px;
+  width: 240px;
   border-color: rgba(255,255,255,0.4);
   background: rgba(255,255,255,0.12);
 }
@@ -879,15 +880,15 @@
 
 @media (max-width: 600px) {
   .globalSearchInput {
-    width: 110px;
+    width: 120px;
   }
 
   .globalSearchInput:focus {
-    width: 150px;
+    width: 160px;
   }
 
   .globalSearchDropdown {
-    width: 200px;
+    width: 210px;
   }
 
   .banner {

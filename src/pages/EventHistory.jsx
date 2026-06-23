@@ -118,11 +118,6 @@ export default function EventHistory() {
       <header className={styles.header}>
         <Link to="/events" className={styles.back}>← Tilbake</Link>
         <h1 className={styles.title}>{data?.eventName ?? eventName}</h1>
-        {data && (
-          <p className={styles.subtitle}>
-            {data.isHansa ? 'Hansa-øvelse — plassering er direkte doeng' : ''}
-          </p>
-        )}
       </header>
 
       <main className={styles.main}>

@@ -107,7 +107,7 @@ function GlobalSearch({ tournaments, setSelectedId }) {
     <div className={styles.globalSearch} ref={containerRef}>
       <input
         type="search"
-        placeholder="Søk..."
+        placeholder="Søk etter deltaker, øvelse..."
         value={query}
         onChange={e => setQuery(e.target.value)}
         onFocus={() => { setOpen(true); loadData() }}
@@ -213,7 +213,6 @@ export default function PublicView() {
             <img src="/byderbyet_emblem.png" alt="Byderbyet-emblem" className={styles.emblem} />
             <h1 className={styles.title}>Byderbyet</h1>
           </div>
-          <GlobalSearch tournaments={tournaments} setSelectedId={setSelectedId} />
           <HallOfFame />
         </div>
         <nav className={styles.nav}>
@@ -243,6 +242,7 @@ export default function PublicView() {
                 ))}
                 <span className={styles.tabSeparator} aria-hidden="true" />
                 <Link to="/events" className={`${styles.tab} ${styles.tabNav}`}>Øvelsesoversikt</Link>
+                <GlobalSearch tournaments={tournaments} setSelectedId={setSelectedId} />
               </div>
             </div>
           )}
@@ -253,7 +253,7 @@ export default function PublicView() {
         {loading && <p className={styles.status}>Laster...</p>}
         {error && <p className={styles.error}>Feil: {error}</p>}
         {data && data.events.length === 0 && <EmptyTournament year={tournaments.find(t => t.id === selectedId)?.year} />}
-        {data && data.events.length > 0 && <TournamentView key={selectedId} data={data} />}
+        {data && data.events.length > 0 && <TournamentView key={selectedId} data={data} isActiveTournament={selectedTournament?.is_active ?? false} />}
       </main>
 
       <footer className={styles.footer}>
@@ -471,17 +471,17 @@ function ComparePanel({ players, events, scoringDirection, onClose }) {
 
 // --- Main tournament view ---
 
-function TournamentView({ data }) {
+function TournamentView({ data, isActiveTournament }) {
   const { events, duelEvents, standings, scoringDirection, isCompleted } = data
   const scoreLabel = scoringDirection === 'desc' ? 'Poeng' : 'Doeng'
 
   const confettiFiredRef = useRef(false)
   useEffect(() => {
-    if (isCompleted && standings.length > 0 && standings[0].total !== 0 && !confettiFiredRef.current) {
+    if (isActiveTournament && isCompleted && standings.length > 0 && standings[0].total !== 0 && !confettiFiredRef.current) {
       confettiFiredRef.current = true
       confetti({ particleCount: 130, spread: 80, origin: { y: 0.55 } })
     }
-  }, [isCompleted, standings])
+  }, [isActiveTournament, isCompleted, standings])
 
   const [sortColumn, setSortColumn] = useState(null)
   const [highlightedId, setHighlightedId] = useState(null)
