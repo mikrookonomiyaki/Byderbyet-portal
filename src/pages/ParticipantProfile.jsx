@@ -316,8 +316,9 @@ function ProfileView({ data }) {
         </div>
       )}
 
-      {years.map(year => {
-        const results = (byYear[year] ?? []).slice().sort((a, b) => a.placement - b.placement)
+      {[...years, ...byderbyWins.filter(y => !years.includes(y))].sort((a, b) => b - a).map(year => {
+        const isStub = !years.includes(year)
+        const results = isStub ? [] : (byYear[year] ?? []).slice().sort((a, b) => a.placement - b.placement)
         const yearDoeng = results.reduce((s, r) => s + r.doeng, 0)
         const scoreLabel = (scoringByYear[year] ?? 'asc') === 'desc' ? 'Poeng' : 'Doeng'
         const rank = standingByYear[year]
@@ -329,7 +330,9 @@ function ProfileView({ data }) {
                 <span className={styles.yearDoeng}>{yearDoeng} {scoreLabel.toLowerCase()} · {rank}. plass</span>
               )}
             </h2>
-            {results.length === 0 ? (
+            {isStub ? (
+              <p className={styles.noResults}>Resultater er ikke tilgjengelig for dette året.</p>
+            ) : results.length === 0 ? (
               <p className={styles.noResults}>Ingen øvelseresultater registrert.</p>
             ) : (
               <div className={styles.tableWrap}>
