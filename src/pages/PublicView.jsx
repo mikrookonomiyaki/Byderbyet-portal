@@ -520,31 +520,14 @@ function TournamentView({ data }) {
   )
   const handleSort = eventId => setSortColumn(prev => prev === eventId ? null : eventId)
 
-  const [searchQuery, setSearchQuery] = useState('')
-
-  const filteredStandings = searchQuery.trim()
-    ? sortedStandings.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    : sortedStandings
-
   const comparePlayers = compareIds.map(id => sortedStandings.find(p => p.id === id)).filter(Boolean)
   const sortedEvent = sortColumn ? allEvents.find(e => e.id === sortColumn) : null
 
   return (
     <div>
       {!isCompleted && <Countdown />}
-      {standings.length > 8 && (
-        <div className={styles.searchRow}>
-          <input
-            type="search"
-            placeholder="Søk deltaker..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className={styles.searchInput}
-          />
-        </div>
-      )}
       <RankingTable
-        standings={filteredStandings}
+        standings={sortedStandings}
         scoreLabel={scoreLabel}
         isCompleted={isCompleted}
         highlightedId={highlightedId}
@@ -556,7 +539,7 @@ function TournamentView({ data }) {
         <div className={styles.detailSection}>
           <p className={styles.detailLabel}>Øvelsesresultater</p>
           <DetailTable
-            standings={filteredStandings}
+            standings={sortedStandings}
             events={allEvents}
             scoreLabel={scoreLabel}
             sortColumn={sortColumn}
