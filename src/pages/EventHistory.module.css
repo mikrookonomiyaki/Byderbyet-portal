@@ -95,6 +95,12 @@
   color: #1a1a1a;
 }
 
+.winner {
+  color: #1a1a1a;
+  background: #dcfce7;
+  font-weight: 700;
+}
+
 .empty {
   color: #ccc;
 }

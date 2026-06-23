@@ -32,7 +32,7 @@ export default function EventsOverview() {
     <div className={styles.page}>
       <header className={styles.header}>
         <Link to="/" className={styles.back}>← Tilbake</Link>
-        <h1 className={styles.title}>Øvelser</h1>
+        <h1 className={styles.title}>Øvelsesoversikt</h1>
         <p className={styles.subtitle}>Alle historiske øvelser, sortert etter antall år de har vært med</p>
       </header>
       <main className={styles.main}>

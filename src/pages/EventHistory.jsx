@@ -163,7 +163,7 @@ function HistoryTable({ data }) {
               {years.map(y => {
                 const r = grid[name][y]
                 return (
-                  <td key={y} className={r ? styles.cell : styles.empty}>
+                  <td key={y} className={r?.placement === 1 ? styles.winner : r ? styles.cell : styles.empty}>
                     {cellLabel(r)}
                   </td>
                 )

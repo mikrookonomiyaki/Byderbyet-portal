@@ -94,7 +94,7 @@ export default function PublicView() {
                   </button>
                 ))}
                 <span className={styles.tabSeparator} aria-hidden="true" />
-                <Link to="/events" className={`${styles.tab} ${styles.tabNav}`}>Øvelser</Link>
+                <Link to="/events" className={`${styles.tab} ${styles.tabNav}`}>Øvelsesoversikt</Link>
               </div>
             </div>
           )}

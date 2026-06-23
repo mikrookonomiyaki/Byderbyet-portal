@@ -28,6 +28,14 @@ export const CATEGORIES = [
     good:  'Strateg',
   },
   {
+    key: 'utholdenhet',
+    label: 'Utholdenhet',
+    // fyllefotball and fosstafett checked here before 'fotball'/'ball' in ballsport below
+    patterns: ['fyllefotball', 'fosstafett', 'løp', 'sprint', 'sykkel', 'svøm', 'klatr', 'maraton', 'potet', 'vandring', 'stafet'],
+    elite: 'Jernmann',
+    good:  'Utholdende',
+  },
+  {
     key: 'ballsport',
     label: 'Ballsport',
     patterns: ['fotball', 'basket', 'tennis', 'badminton', 'volleyball', 'håndball', 'padel',
@@ -57,13 +65,6 @@ export const CATEGORIES = [
                'papirfly', 'ballong', 'halen', 'wii', 'sykle'],
     elite: 'Akrobat',
     good:  'Koordinert',
-  },
-  {
-    key: 'utholdenhet',
-    label: 'Utholdenhet',
-    patterns: ['løp', 'sprint', 'sykkel', 'svøm', 'klatr', 'maraton', 'potet', 'vandring', 'stafet'],
-    elite: 'Jernmann',
-    good:  'Utholdende',
   },
   {
     key: 'kreativitet',
