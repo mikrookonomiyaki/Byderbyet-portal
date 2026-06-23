@@ -238,7 +238,8 @@ function Sparkline({ years, standingByYear, participantCountByYear }) {
 }
 
 function ProfileView({ data }) {
-  const { years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords, participantCountByYear } = data
+  const { name, years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords, participantCountByYear } = data
+  const firstName = name.split(' ')[0]
   const allResults = Object.values(byYear).flat()
   const hasHansa = allResults.some(r => r.event.name.toLowerCase().includes('sanksjon'))
 
@@ -331,7 +332,7 @@ function ProfileView({ data }) {
               )}
             </h2>
             {isStub ? (
-              <p className={styles.noResults}>Resultater er ikke tilgjengelig for dette året.</p>
+              <p className={styles.noResults}>Vi har rota bort resultatene for dette året, men {firstName} vant.</p>
             ) : results.length === 0 ? (
               <p className={styles.noResults}>Ingen øvelseresultater registrert.</p>
             ) : (

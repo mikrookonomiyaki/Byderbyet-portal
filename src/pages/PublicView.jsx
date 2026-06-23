@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import confetti from 'canvas-confetti'
 import { useTournamentData } from '../hooks/useTournamentData'
@@ -28,6 +28,153 @@ function HallOfFame() {
           </li>
         ))}
       </ul>
+    </div>
+  )
+}
+
+const FAQ_QUESTIONS = [
+  'Hva er Byderbyet?',
+  'Kan jeg se resultater fra tidligere år?',
+  'Hvorfor har jeg fått de adjektivene jeg har fått?',
+  'Hva betyr mastergrad-hatten på adjektivet?',
+  'Hva betyr "Doeng"?',
+  'Hvordan beregnes doeng per øvelse?',
+  'Hva er en Duell?',
+  'Hva er Hansa-sanksjonen?',
+  'Hva er Æresgalleriet?',
+  'Hvem kan delta i Byderbyet?',
+  'Når oppdateres resultatene på siden?',
+  'Hva skjer ved poenglikhet?',
+]
+
+function GlobalSearch({ tournaments, setSelectedId }) {
+  const navigate = useNavigate()
+  const [query, setQuery] = useState('')
+  const [open, setOpen] = useState(false)
+  const [participants, setParticipants] = useState(null)
+  const [searchEvents, setSearchEvents] = useState(null)
+  const containerRef = useRef(null)
+  const loadedRef = useRef(false)
+
+  useEffect(() => {
+    function handleMouseDown(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => document.removeEventListener('mousedown', handleMouseDown)
+  }, [])
+
+  async function loadData() {
+    if (loadedRef.current) return
+    loadedRef.current = true
+    const [pRes, eRes] = await Promise.all([
+      supabase.from('participants').select('name').limit(10000),
+      supabase.from('events').select('name').neq('is_published', false).limit(10000),
+    ])
+    const pNames = [...new Set((pRes.data ?? []).map(p => p.name))]
+    const eNames = [...new Set((eRes.data ?? []).map(e => canonicalize(e.name)))]
+    setParticipants(pNames)
+    setSearchEvents(eNames)
+  }
+
+  const q = query.trim().toLowerCase()
+  const hasQuery = q.length >= 2
+
+  const matchedParticipants = hasQuery && participants
+    ? [...new Set(participants.filter(n => n.toLowerCase().includes(q)))].slice(0, 5)
+    : []
+  const matchedEvents = hasQuery && searchEvents
+    ? [...new Set(searchEvents.filter(n => n.toLowerCase().includes(q)))].slice(0, 4)
+    : []
+  const matchedYears = hasQuery
+    ? tournaments.filter(t => String(t.year).includes(q)).slice(0, 3)
+    : []
+  const matchedFAQ = hasQuery
+    ? FAQ_QUESTIONS.filter(f => f.toLowerCase().includes(q)).slice(0, 3)
+    : []
+
+  const hasResults = matchedParticipants.length + matchedEvents.length + matchedYears.length + matchedFAQ.length > 0
+  const showDropdown = open && hasQuery
+
+  function select() {
+    setQuery('')
+    setOpen(false)
+  }
+
+  return (
+    <div className={styles.globalSearch} ref={containerRef}>
+      <input
+        type="search"
+        placeholder="Søk..."
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        onFocus={() => { setOpen(true); loadData() }}
+        className={styles.globalSearchInput}
+        aria-label="Søk på siden"
+      />
+      {showDropdown && (
+        <div className={styles.globalSearchDropdown}>
+          {!hasResults && <p className={styles.dropdownEmpty}>Ingen treff</p>}
+          {matchedParticipants.length > 0 && (
+            <div className={styles.dropdownGroup}>
+              <span className={styles.dropdownGroupLabel}>Deltakere</span>
+              {matchedParticipants.map(name => (
+                <button
+                  key={name}
+                  className={styles.dropdownItem}
+                  onMouseDown={() => { navigate(`/participant/${encodeURIComponent(name)}`); select() }}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+          )}
+          {matchedEvents.length > 0 && (
+            <div className={styles.dropdownGroup}>
+              <span className={styles.dropdownGroupLabel}>Øvelser</span>
+              {matchedEvents.map(name => (
+                <button
+                  key={name}
+                  className={styles.dropdownItem}
+                  onMouseDown={() => { navigate(`/event/${encodeURIComponent(name)}`); select() }}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+          )}
+          {matchedYears.length > 0 && (
+            <div className={styles.dropdownGroup}>
+              <span className={styles.dropdownGroupLabel}>År</span>
+              {matchedYears.map(t => (
+                <button
+                  key={t.id}
+                  className={styles.dropdownItem}
+                  onMouseDown={() => { setSelectedId(t.id); select() }}
+                >
+                  {t.year}
+                </button>
+              ))}
+            </div>
+          )}
+          {matchedFAQ.length > 0 && (
+            <div className={styles.dropdownGroup}>
+              <span className={styles.dropdownGroupLabel}>FAQ</span>
+              {matchedFAQ.map(faq => (
+                <button
+                  key={faq}
+                  className={styles.dropdownItem}
+                  onMouseDown={() => { navigate('/faq'); select() }}
+                >
+                  {faq}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -66,6 +213,7 @@ export default function PublicView() {
             <img src="/byderbyet_emblem.png" alt="Byderbyet-emblem" className={styles.emblem} />
             <h1 className={styles.title}>Byderbyet</h1>
           </div>
+          <GlobalSearch tournaments={tournaments} setSelectedId={setSelectedId} />
           <HallOfFame />
         </div>
         <nav className={styles.nav}>
@@ -350,7 +498,12 @@ function TournamentView({ data }) {
   }), [events, duelEvents])
 
   const sortedStandings = useMemo(() => {
-    if (!sortColumn) return standings
+    if (!sortColumn) {
+      if (standings.length > 0 && standings.every(p => p.total === 0)) {
+        return [...standings].sort((a, b) => a.name.localeCompare(b.name, 'no'))
+      }
+      return standings
+    }
     return [...standings].sort((a, b) => {
       const ra = a.eventResults[sortColumn]?.doeng
       const rb = b.eventResults[sortColumn]?.doeng
