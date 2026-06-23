@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useLocation } from 'react-router-dom'
 import confetti from 'canvas-confetti'
 import { supabase } from '../supabaseClient'
 import { canonicalize } from '../eventNames'
@@ -12,10 +12,17 @@ import styles from './ParticipantProfile.module.css'
 export default function ParticipantProfile() {
   const { name } = useParams()
   const participantName = decodeURIComponent(name)
+  const location = useLocation()
 
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  useEffect(() => {
+    if (location.state?.confetti) {
+      confetti({ particleCount: 130, spread: 80, origin: { y: 0.55 } })
+    }
+  }, [location.state?.confetti])
 
   useEffect(() => {
     async function load() {
@@ -189,9 +196,6 @@ export default function ParticipantProfile() {
       })
 
       setData({ name: participantName, years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords, participantCountByYear, completedYears })
-      if (byderbyWins.length > 0) {
-        confetti({ particleCount: 130, spread: 80, origin: { y: 0.55 } })
-      }
       setLoading(false)
     }
 
@@ -256,7 +260,8 @@ function Sparkline({ years, standingByYear, participantCountByYear }) {
 }
 
 function ProfileView({ data }) {
-  const { years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords, participantCountByYear, completedYears } = data
+  const { name, years, byYear, avgPlacement, etappeseiere, solvAar, bronseAar, byderbyWins, scoringByYear, standingByYear, keywords, participantCountByYear, completedYears } = data
+  const firstName = name.split(' ')[0]
   const allResults = Object.values(byYear).flat()
   const hasHansa = allResults.some(r => r.event.name.toLowerCase().includes('sanksjon'))
 
@@ -334,9 +339,9 @@ function ProfileView({ data }) {
         </div>
       )}
 
-
-      {years.map(year => {
-        const results = (byYear[year] ?? []).slice().sort((a, b) => a.placement - b.placement)
+      {[...years, ...byderbyWins.filter(y => !years.includes(y))].sort((a, b) => b - a).map(year => {
+        const isStub = !years.includes(year)
+        const results = isStub ? [] : (byYear[year] ?? []).slice().sort((a, b) => a.placement - b.placement)
         const yearDoeng = results.reduce((s, r) => s + r.doeng, 0)
         const scoreLabel = (scoringByYear[year] ?? 'asc') === 'desc' ? 'Poeng' : 'Doeng'
         const rank = standingByYear[year]
@@ -348,7 +353,9 @@ function ProfileView({ data }) {
                 <span className={styles.yearDoeng}>{yearDoeng} {scoreLabel.toLowerCase()} · {rank}. plass</span>
               )}
             </h2>
-            {results.length === 0 ? (
+            {isStub ? (
+              <p className={styles.noResults}>Vi har rota bort resultatene for dette året, men {firstName} vant.</p>
+            ) : results.length === 0 ? (
               <p className={styles.noResults}>Ingen øvelseresultater registrert.</p>
             ) : (
               <div className={styles.tableWrap}>
