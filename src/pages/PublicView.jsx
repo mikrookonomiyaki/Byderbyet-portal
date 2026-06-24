@@ -482,7 +482,12 @@ function TournamentView({ data, isActiveTournament, isTournamentClosed }) {
   useEffect(() => {
     if (isActiveTournament && isTournamentClosed && standings.length > 0 && standings[0].total !== 0 && !confettiFiredRef.current) {
       confettiFiredRef.current = true
-      confetti({ particleCount: 130, spread: 80, origin: { y: 0.55 } })
+      confetti({ particleCount: 160, spread: 90, origin: { y: 0.55 }, ticks: 400 })
+      setTimeout(() => {
+        confetti({ particleCount: 90, angle: 60, spread: 60, origin: { x: 0.1, y: 0.6 }, ticks: 380 })
+        confetti({ particleCount: 90, angle: 120, spread: 60, origin: { x: 0.9, y: 0.6 }, ticks: 380 })
+      }, 700)
+      setTimeout(() => confetti({ particleCount: 70, spread: 75, origin: { y: 0.45 }, ticks: 350 }), 1600)
     }
   }, [isActiveTournament, isTournamentClosed, standings])
 
