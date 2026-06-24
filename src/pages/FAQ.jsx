@@ -57,7 +57,7 @@ const QAS = [
   },
   {
     q: 'Hva er Hansa-sanksjonen?',
-    a: 'Hansa-sanksjonen er Byderbyet sin offisielle reaksjon på ett av de groveste bruddene i konkurransen: å dukke opp med en drikkevare produsert av Hansa Bryggeri. Det er ikke bare et dårlig valg — det er en erklæring om at du ikke respekterer verken deg selv, Byderbyet eller de rundt deg. Straffen er umiddelbar og nådeløs: et vilkårlig antall doeng legges rett til i totalen din, ingen skala, ingen anke, ingen juridisk bistand. Arrangøren er dommer, jury og bøddel. Deltakere som har mottatt sanksjonen, bærer merket "Hansa-dranker" på profilen sin — for alltid. La det være en advarsel: det finnes gode øl i verden. Hansa er ikke blant dem.',
+    a: 'Hansa-sanksjonen er Byderbyet sin offisielle reaksjon på ett av de groveste bruddene i konkurransen: å dukke opp med en drikkevare produsert av Hansa Bryggeri. Det er ikke bare et dårlig valg — det er en erklæring om at du ikke respekterer verken deg selv, Byderbyet eller de rundt deg. Straffen er umiddelbar og nådeløs: +5 doeng legges rett til i totalen din, ingen anke, ingen juridisk bistand. Arrangøren er dommer, jury og bøddel. Deltakere som har mottatt sanksjonen, bærer merket "Hansa-dranker" på profilen sin — for alltid. La det være en advarsel: det finnes gode øl i verden. Hansa er ikke blant dem.',
   },
   {
     q: 'Hvem kan delta i Byderbyet?',
