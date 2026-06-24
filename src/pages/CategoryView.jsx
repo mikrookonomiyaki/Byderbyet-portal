@@ -183,7 +183,14 @@ export default function CategoryView() {
                       ) : <span className={styles.none}>—</span>}
                     </td>
                     <td className={styles.eventsList}>
-                      {row.eventNames.join(' · ')}
+                      {row.eventNames.map((evName, idx) => (
+                        <span key={evName}>
+                          {idx > 0 && ' · '}
+                          <Link to={`/event/${encodeURIComponent(evName)}`} className={styles.eventLink}>
+                            {evName}
+                          </Link>
+                        </span>
+                      ))}
                     </td>
                   </tr>
                 ))}

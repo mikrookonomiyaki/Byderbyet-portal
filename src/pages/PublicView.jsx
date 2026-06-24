@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import confetti from 'canvas-confetti'
 import { useTournamentData } from '../hooks/useTournamentData'
@@ -183,16 +183,19 @@ export default function PublicView() {
   const [tournaments, setTournaments] = useState([])
   const [selectedId, setSelectedId] = useState(null)
   const { data, loading, error } = useTournamentData(selectedId)
+  const [searchParams] = useSearchParams()
 
   useEffect(() => {
     supabase.from('tournaments').select('*').order('year', { ascending: false }).then(({ data }) => {
       if (data) {
         setTournaments(data)
-        const active = data.find(t => t.is_active) ?? data[0]
+        const yearParam = searchParams.get('year')
+        const matched = yearParam ? data.find(t => String(t.year) === yearParam) : null
+        const active = matched ?? data.find(t => t.is_active) ?? data[0]
         if (active) setSelectedId(active.id)
       }
     })
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectedTournament = tournaments.find(t => t.id === selectedId)
 

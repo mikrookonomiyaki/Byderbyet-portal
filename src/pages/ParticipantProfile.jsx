@@ -297,7 +297,7 @@ function ProfileView({ data }) {
               </h2>
               <div className={styles.trophyList}>
                 {byderbyWins.map(y => (
-                  <span key={y} className={styles.trophy}>{y}</span>
+                  <Link key={y} to={`/?year=${y}`} className={styles.trophy}>{y}</Link>
                 ))}
               </div>
             </div>
@@ -307,7 +307,11 @@ function ProfileView({ data }) {
                 <div className={styles.medalList}>
                   {[...solvAar.map(y => ({ year: y, type: 'solv' })), ...bronseAar.map(y => ({ year: y, type: 'bronse' }))]
                     .sort((a, b) => b.year - a.year)
-                    .map(m => <MedalEmblem key={`${m.type}-${m.year}`} year={m.year} type={m.type} />)}
+                    .map(m => (
+                      <Link key={`${m.type}-${m.year}`} to={`/?year=${m.year}`} className={styles.medalLink}>
+                        <MedalEmblem year={m.year} type={m.type} />
+                      </Link>
+                    ))}
                 </div>
               </div>
             )}
@@ -321,7 +325,11 @@ function ProfileView({ data }) {
           <div className={styles.medalList}>
             {[...solvAar.map(y => ({ year: y, type: 'solv' })), ...bronseAar.map(y => ({ year: y, type: 'bronse' }))]
               .sort((a, b) => b.year - a.year)
-              .map(m => <MedalEmblem key={`${m.type}-${m.year}`} year={m.year} type={m.type} />)}
+              .map(m => (
+                <Link key={`${m.type}-${m.year}`} to={`/?year=${m.year}`} className={styles.medalLink}>
+                  <MedalEmblem year={m.year} type={m.type} />
+                </Link>
+              ))}
           </div>
         </div>
       )}
@@ -357,7 +365,7 @@ function ProfileView({ data }) {
         return (
           <div key={year} className={styles.yearBlock}>
             <h2 className={styles.yearTitle}>
-              {year}
+              <Link to={`/?year=${year}`} className={styles.yearLink}>{year}</Link>
               {results.length > 0 && (
                 <span className={styles.yearDoeng}>{yearDoeng} {scoreLabel.toLowerCase()} · {rank}. plass</span>
               )}

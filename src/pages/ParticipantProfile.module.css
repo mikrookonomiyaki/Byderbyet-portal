@@ -197,7 +197,15 @@
   border-radius: 6px;
   border: 1px solid #8b6914;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 1px 3px rgba(0,0,0,0.2);
+  text-decoration: none;
 }
+.trophy:hover { filter: brightness(1.08); }
+
+.medalLink {
+  display: inline-flex;
+  text-decoration: none;
+}
+.medalLink:hover { opacity: 0.85; }
 
 .medalSection {
   margin-bottom: 1.5rem;
@@ -261,6 +269,12 @@
   font-weight: 700;
   margin: 0 0 0.75rem;
 }
+
+.yearLink {
+  color: inherit;
+  text-decoration: none;
+}
+.yearLink:hover { text-decoration: underline; }
 
 .yearDoeng {
   font-weight: 400;
