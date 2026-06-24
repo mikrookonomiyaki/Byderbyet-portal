@@ -253,7 +253,7 @@ export default function PublicView() {
         {loading && <p className={styles.status}>Laster...</p>}
         {error && <p className={styles.error}>Feil: {error}</p>}
         {data && data.events.length === 0 && <EmptyTournament year={tournaments.find(t => t.id === selectedId)?.year} />}
-        {data && data.events.length > 0 && <TournamentView key={selectedId} data={data} isActiveTournament={selectedTournament?.is_active ?? false} />}
+        {data && data.events.length > 0 && <TournamentView key={selectedId} data={data} isActiveTournament={selectedTournament?.is_active ?? false} isTournamentClosed={selectedTournament?.is_completed === true} />}
       </main>
 
       <footer className={styles.footer}>
@@ -471,17 +471,17 @@ function ComparePanel({ players, events, scoringDirection, onClose }) {
 
 // --- Main tournament view ---
 
-function TournamentView({ data, isActiveTournament }) {
+function TournamentView({ data, isActiveTournament, isTournamentClosed }) {
   const { events, duelEvents, standings, scoringDirection, isCompleted } = data
   const scoreLabel = scoringDirection === 'desc' ? 'Poeng' : 'Doeng'
 
   const confettiFiredRef = useRef(false)
   useEffect(() => {
-    if (isActiveTournament && isCompleted && standings.length > 0 && standings[0].total !== 0 && !confettiFiredRef.current) {
+    if (isActiveTournament && isTournamentClosed && standings.length > 0 && standings[0].total !== 0 && !confettiFiredRef.current) {
       confettiFiredRef.current = true
       confetti({ particleCount: 130, spread: 80, origin: { y: 0.55 } })
     }
-  }, [isActiveTournament, isCompleted, standings])
+  }, [isActiveTournament, isTournamentClosed, standings])
 
   const [sortColumn, setSortColumn] = useState(null)
   const [highlightedId, setHighlightedId] = useState(null)

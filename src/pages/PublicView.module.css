@@ -281,18 +281,18 @@
 .globalSearchInput {
   width: 180px;
   padding: 0.3rem 0.65rem;
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid transparent;
   border-radius: 6px;
   font-size: 0.8rem;
   font-family: inherit;
-  background: rgba(255,255,255,0.08);
+  background: transparent;
   color: #e2e8f0;
   outline: none;
   transition: width 0.2s, border-color 0.15s, background 0.15s;
 }
 
 .globalSearchInput::placeholder {
-  color: rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.5);
 }
 
 .globalSearchInput:focus {

@@ -9,6 +9,11 @@ import MortarboardIcon from '../components/MortarboardIcon'
 import { computeKeywordsFromAllResults } from '../utils/playerKeywords'
 import styles from './ParticipantProfile.module.css'
 
+// Years where the winner is known but not in the database (no results registered)
+const KNOWN_WINS = [
+  { year: 2022, nameIncludes: 'philip' },
+]
+
 export default function ParticipantProfile() {
   const { name } = useParams()
   const participantName = decodeURIComponent(name)
@@ -125,11 +130,15 @@ export default function ParticipantProfile() {
       const overrideWins = tourRes.data
         .filter(t => t.winner_override?.toLowerCase() === participantName.toLowerCase() && completedYears.has(t.year))
         .map(t => t.year)
+      const knownWins = KNOWN_WINS
+        .filter(w => participantName.toLowerCase().includes(w.nameIncludes))
+        .map(w => w.year)
       const byderbyWins = [
         ...(hofData ?? [])
           .filter(w => w.name.toLowerCase() === participantName.toLowerCase() && completedYears.has(w.year))
           .map(w => w.year),
         ...overrideWins,
+        ...knownWins,
       ].filter((y, i, arr) => arr.indexOf(y) === i).sort((a, b) => b - a)
 
       // Compute final standing per year

@@ -31,7 +31,10 @@ export default function CategoryView() {
       // Filter events belonging to this category
       const matchingEvents = eventsRes.data.filter(e => {
         if (key === 'duell') return e.is_duel === true
-        if (e.is_duel || e.is_hansa) return false
+        if (e.is_duel) return false
+        // Exclude the actual Hansa sanction event by name, not by flag —
+        // the flag can be incorrectly set on legitimate events (e.g. Fosstafetten)
+        if (canonicalize(e.name).toLowerCase().includes('sanksjon')) return false
         const cat = getCategory(e.name)
         return cat?.key === key
       })

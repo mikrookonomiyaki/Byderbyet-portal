@@ -137,7 +137,10 @@ export function computeKeywordsFromAllResults(targetName, allResults, eventById,
   const catStats = {} // { catKey: { [nameLower]: { name, entries[] } } }
   for (const r of allResults) {
     const event = eventById[r.event_id]
-    if (!event || event.is_hansa) continue
+    if (!event) continue
+    // Exclude Hansa sanction events by name rather than flag — the flag can be
+    // incorrectly set on legitimate events (e.g. Fosstafetten)
+    if (event.name.toLowerCase().includes('sanksjon')) continue
     const participant = participantById[r.participant_id]
     if (!participant) continue
     const cat = event.is_duel ? DUEL_CAT : getCategory(event.name)
