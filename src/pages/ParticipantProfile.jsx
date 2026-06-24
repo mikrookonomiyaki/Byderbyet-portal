@@ -217,7 +217,7 @@ export default function ParticipantProfile() {
         <Link to="/" className={styles.back}>← Tilbake</Link>
         <h1 className={styles.title}>
           {participantName}
-          {data && <span className={styles.yearsTag}>{data.years.length} år</span>}
+          {data && <span className={styles.yearsTag}>Har deltatt {data.years.length} år</span>}
         </h1>
       </header>
       <main className={styles.main}>
