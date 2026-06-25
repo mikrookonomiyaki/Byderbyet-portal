@@ -73,6 +73,7 @@ export default function EventHistory() {
       const years = tourRes.data
         .filter(t => relevantTournamentIds.includes(t.id))
         .map(t => t.year)
+        .reverse()
 
       // Collect all participant names that appear in any of these events
       const nameSet = new Set()
