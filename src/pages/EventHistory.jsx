@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { canonicalize } from '../eventNames'
+import { getEventIcon } from '../utils/eventIcons'
 import styles from './EventHistory.module.css'
 
 export default function EventHistory() {
@@ -117,7 +118,10 @@ export default function EventHistory() {
     <div className={styles.page}>
       <header className={styles.header}>
         <Link to="/events" className={styles.back}>← Tilbake</Link>
-        <h1 className={styles.title}>{data?.eventName ?? eventName}</h1>
+        <h1 className={styles.title}>
+          {data?.eventName ?? eventName}
+          {data && <span className={styles.titleIcon}>{getEventIcon(data.eventName)}</span>}
+        </h1>
       </header>
 
       <main className={styles.main}>
@@ -138,12 +142,19 @@ function HistoryTable({ data }) {
     return `${r.placement} (${r.doeng})`
   }
 
+  function avgPlacement(name) {
+    const vals = Object.values(grid[name])
+    if (!vals.length) return null
+    return (vals.reduce((s, r) => s + r.placement, 0) / vals.length).toFixed(1)
+  }
+
   return (
     <div className={styles.tableWrap}>
       <table className={styles.table}>
         <thead>
           <tr>
             <th className={styles.nameCol}>Deltaker</th>
+            <th className={styles.avgCol}>Gj.snitt plass.</th>
             {years.map(y => <th key={y}>{y}</th>)}
           </tr>
         </thead>
@@ -155,6 +166,7 @@ function HistoryTable({ data }) {
                   {name}
                 </Link>
               </td>
+              <td className={styles.avgCol}>{avgPlacement(name) ?? '—'}</td>
               {years.map(y => {
                 const r = grid[name][y]
                 return (

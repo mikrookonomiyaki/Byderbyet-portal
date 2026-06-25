@@ -28,6 +28,14 @@
   font-weight: 800;
   letter-spacing: -0.03em;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.titleIcon {
+  font-size: 1.5rem;
+  line-height: 1;
 }
 
 .subtitle {
@@ -80,6 +88,12 @@
 .nameCol {
   min-width: 120px;
   font-weight: 500;
+}
+
+.avgCol {
+  min-width: 90px;
+  color: #555;
+  font-variant-numeric: tabular-nums;
 }
 
 .nameLink {
