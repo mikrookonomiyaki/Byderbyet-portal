@@ -32,7 +32,7 @@ export const CATEGORIES = [
     label: 'Utholdenhet',
     // fylle/fyllefotball and fosstafett/tafet checked before 'fotball'/'ball' in ballsport below
     patterns: ['fylle', 'foss', 'fosstafet', 'tafet', 'løp', 'sprint', 'sykkel', 'svøm', 'klatr', 'maraton', 'potet', 'vandring', 'stafet'],
-    elite: 'Jernmann',
+    elite: 'Marathonløper',
     good:  'Utholdende',
   },
   {
@@ -77,7 +77,7 @@ export const CATEGORIES = [
     key: 'styrke',
     label: 'Styrke',
     patterns: ['tautrekk', 'vektløft', 'arm', 'styrke', 'bryting', 'kamp', 'kule'],
-    elite: 'Kraftkar',
+    elite: 'Strongman',
     good:  'Sterk',
   },
 ]
