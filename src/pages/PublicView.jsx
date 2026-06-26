@@ -57,13 +57,13 @@ function GlobalSearch({ tournaments, setSelectedId }) {
   const loadedRef = useRef(false)
 
   useEffect(() => {
-    function handleMouseDown(e) {
+    function handlePointerDown(e) {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setOpen(false)
       }
     }
-    document.addEventListener('mousedown', handleMouseDown)
-    return () => document.removeEventListener('mousedown', handleMouseDown)
+    document.addEventListener('pointerdown', handlePointerDown)
+    return () => document.removeEventListener('pointerdown', handlePointerDown)
   }, [])
 
   async function loadData() {
@@ -124,7 +124,7 @@ function GlobalSearch({ tournaments, setSelectedId }) {
                 <button
                   key={name}
                   className={styles.dropdownItem}
-                  onMouseDown={() => { navigate(`/participant/${encodeURIComponent(name)}`); select() }}
+                  onPointerDown={() => { navigate(`/participant/${encodeURIComponent(name)}`); select() }}
                 >
                   {name}
                 </button>
@@ -138,7 +138,7 @@ function GlobalSearch({ tournaments, setSelectedId }) {
                 <button
                   key={name}
                   className={styles.dropdownItem}
-                  onMouseDown={() => { navigate(`/event/${encodeURIComponent(name)}`); select() }}
+                  onPointerDown={() => { navigate(`/event/${encodeURIComponent(name)}`); select() }}
                 >
                   {name}
                 </button>
@@ -152,7 +152,7 @@ function GlobalSearch({ tournaments, setSelectedId }) {
                 <button
                   key={t.id}
                   className={styles.dropdownItem}
-                  onMouseDown={() => { setSelectedId(t.id); select() }}
+                  onPointerDown={() => { setSelectedId(t.id); select() }}
                 >
                   {t.year}
                 </button>
@@ -166,7 +166,7 @@ function GlobalSearch({ tournaments, setSelectedId }) {
                 <button
                   key={faq}
                   className={styles.dropdownItem}
-                  onMouseDown={() => { navigate('/faq'); select() }}
+                  onPointerDown={() => { navigate('/faq'); select() }}
                 >
                   {faq}
                 </button>
